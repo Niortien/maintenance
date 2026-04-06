@@ -45,17 +45,23 @@ export async function createIntervention(body: CreateInterventionType) {
   
   const parsed = createInterventionSchema.safeParse(body);
   if (!parsed.success) {
+    console.error("Validation error:", parsed.error.issues);
     return {
       success: false,
       error: parsed.error.issues.map(issue => issue.message).join(", "),
     };
   }
 
-  return fetchJson<IIntervention>(InterventionApi.create.endpoint(), {
+  console.log("Sending intervention data:", parsed.data);
+
+  const result = await fetchJson<IIntervention>(InterventionApi.create.endpoint(), {
     method: InterventionApi.create.method,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(parsed.data),
   });
+
+  console.log("API response:", result);
+  return result;
 }
 
 // GET ALL INTERVENTIONS

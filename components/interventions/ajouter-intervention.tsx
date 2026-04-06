@@ -48,8 +48,8 @@ const AjouterInterventionDialog = () => {
       situation: "",
       designation: "",
       priorite: "MOYENNE",
-      cout: 0,
-      temps_estime_heures: 0,
+      cout: 1,
+      temps_estime_heures: 1,
       temps_reel_heures: undefined,
       pieces_utilisees: "",
       notes_additionnelles: "",
@@ -212,6 +212,44 @@ const AjouterInterventionDialog = () => {
                           <option value="URGENTE">URGENTE</option>
                           <option value="ELEVEE">ELEVEE</option>
                         </select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="cout"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Coût (€)</FormLabel>
+                      <FormControl>
+                        <input
+                          type="number"
+                          min="1"
+                          step="0.01"
+                          {...field}
+                          className="border p-2 w-full rounded"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="temps_estime_heures"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Temps estimé (heures)</FormLabel>
+                      <FormControl>
+                        <input
+                          type="number"
+                          min="1"
+                          step="0.5"
+                          {...field}
+                          className="border p-2 w-full rounded"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
