@@ -1,36 +1,36 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { getAllInterventions } from "@/service/interventions/interventions.action";
 import { IIntervention } from "@/service/interventions/types/interventions/intervention.type";
-
 import { toast } from "sonner";
 import InterventionCard from "./interventions-card";
+import { useQuery } from '@tanstack/react-query';
 
 const InterventionList = () => {
   const [interventions, setInterventions] = useState<IIntervention[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  // Récupération des interventions
-  const fetchInterventions = async () => {
-    setLoading(true);
-    try {
-      const res = await getAllInterventions();
-      if (res.success && "data" in res) {
-        setInterventions(res.data);
-      } else {
-        toast.error(res.error || "Erreur lors du chargement des interventions");
-      }
-    } catch {
-      toast.error("Erreur inattendue");
-    } finally {
-      setLoading(false);
+  // Utiliser React Query pour les interventions
+  const { data: interventionsData, isPending, error, refetch } = useQuery({
+    queryKey: ['interventions', 'list'],
+    queryFn: () => getAllInterventions(),
+  });
+
+  // Mettre à jour l'état local quand les données changent
+  React.useEffect(() => {
+    if (interventionsData?.success && interventionsData.data) {
+      setInterventions(interventionsData.data);
     }
-  };
+  }, [interventionsData]);
 
-  useEffect(() => {
-    fetchInterventions();
-  }, []);
+  // Gérer les erreurs
+  React.useEffect(() => {
+    if (error) {
+      toast.error("Erreur lors du chargement des interventions");
+    } else if (!interventionsData?.success && interventionsData?.error) {
+      toast.error(interventionsData.error);
+    }
+  }, [error, interventionsData]);
 
   const handleDelete = (id: string) => {
     setInterventions((prev) => prev.filter((i) => i.id !== id));
@@ -42,13 +42,13 @@ const InterventionList = () => {
     );
   };
 
-  if (loading) return (
+  if (isPending) return (
     <div className="flex items-center justify-center py-16">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
     </div>
   );
 
-  if (!loading && interventions.length === 0)
+  if (!isPending && interventions.length === 0)
     return (
       <div className="text-center py-16 rounded-2xl bg-white dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-600">
         <p className="text-xl text-slate-600 dark:text-slate-400 font-medium">Aucune intervention disponible</p>

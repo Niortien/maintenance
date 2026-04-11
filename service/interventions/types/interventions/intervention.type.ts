@@ -34,9 +34,32 @@ export type CreateInterventionType = {
   createdAt   :string         
   updatedAt :string
 };
+
 export interface InterventionStats {
     totalInterventions: number;
     interventionsEnCours: number;
     interventionsTerminees: number;
     interventionsUrgentes: number;
+}
+
+export interface AllStatistics {
+  interventions: {
+    total: number;
+    enCours: number;
+    terminees: number;
+    urgentes: number;
+    enAttente: number;
+    coutTotal: number;
+  };
+  techniciens: {
+    total: number;
+    actifs: number;
+    tauxActivite: string;
+  };
+  vehicules: {
+    total: number;
+    actifs: number;
+    enMaintenance: number;
+    tauxDisponibilite: string;
+  };
 }

@@ -1,39 +1,38 @@
 'use client'
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import TechniciensCards from "./techniciens-cards";
 import { getAllTechniciens } from "@/service/techniciens/technicien.action";
 import { toast } from "sonner";
 import type { ITechnicien } from "@/service/techniciens/types/technicien.type";
+import { useQuery } from '@tanstack/react-query';
 
 const TechniciensList = () => {
   const [techniciens, setTechniciens] = useState<ITechnicien[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  // Fetch des techniciens
-  const fetchTechniciens = async () => {
-  setLoading(true);
-  try {
-    const res = await getAllTechniciens(); // ici TS sait que res.data est ITechnicien[]
+  // Utiliser React Query pour les techniciens
+  const { data: techniciensData, isPending, error, refetch } = useQuery({
+    queryKey: ['techniciens', 'list'],
+    queryFn: () => getAllTechniciens(),
+  });
 
-    if (res.success) {
-      setTechniciens(res.data); // data est bien un tableau de techniciens
-      toast.success("Techniciens chargés !");
-    } else {
-      toast.error(res.error);
+  // Mettre à jour l'état local quand les données changent
+  React.useEffect(() => {
+    if (techniciensData?.success && techniciensData.data) {
+      setTechniciens(techniciensData.data);
     }
-  } catch (error) {
-    console.error(error);
-    toast.error("Erreur lors du chargement des techniciens");
-  } finally {
-    setLoading(false);
-  }
-};
+  }, [techniciensData]);
 
-
-  useEffect(() => {
-    fetchTechniciens();
-  }, []);
+  // Gérer les erreurs
+  React.useEffect(() => {
+    if (error) {
+      toast.error("Erreur lors du chargement des techniciens");
+    } else if (techniciensData?.success) {
+      toast.success("Techniciens chargés !");
+    } else if (techniciensData?.error) {
+      toast.error(techniciensData.error);
+    }
+  }, [error, techniciensData]);
 
   // Supprimer un technicien
   const handleDelete = (id: string) => {
@@ -47,15 +46,20 @@ const TechniciensList = () => {
     );
   };
 
+  // Rafraîchir les données
+  const handleRefresh = () => {
+    refetch();
+  };
+
   return (
     <div className="space-y-6">
-      {loading && (
+      {isPending && (
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
         </div>
       )}
       
-      {!loading && techniciens.length === 0 && (
+      {!isPending && techniciens.length === 0 && (
         <div className="text-center py-12 rounded-2xl bg-white dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-600">
           <p className="text-xl text-slate-600 dark:text-slate-400 font-medium">Aucun technicien disponible</p>
           <p className="text-slate-500 dark:text-slate-500 mt-2">Commencez par ajouter votre premier technicien</p>

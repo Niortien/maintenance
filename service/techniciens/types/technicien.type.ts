@@ -7,3 +7,11 @@ telephone: string;
 specialite: string;
 statut: string;
 }
+
+export interface TechnicienStats {
+    totalTechniciens: number;
+    techniciensActifs: number;
+    techniciensEnMaintenance: number;
+    techniciensInactifs: number;
+    techniciensAvecInterventionsEnCours: number;
+}

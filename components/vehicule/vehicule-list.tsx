@@ -1,48 +1,46 @@
 'use client'
 
+import React, { useState } from "react";
 import { IVehicule } from "@/service/vehicule/types/vehicule.type";
 import { getAllVehicule } from "@/service/vehicule/vehicule.action";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import VehiculeCards from "./vehicule-cards";
-
+import { useQuery } from '@tanstack/react-query';
 import EmptyState from "./empty-state";
 
 const VehiculeList = () => {
   const [vehicules, setVehicules] = useState<IVehicule[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  // Fetch des vehicules
-  const fetchVehicule = async () => {
-  setLoading(true);
-  try {
-    const res = await getAllVehicule(); // ici TS sait que res.data est ITechnicien[]
+  // Utiliser React Query pour les véhicules
+  const { data: vehiculesData, isPending, error, refetch } = useQuery({
+    queryKey: ['vehicules', 'list'],
+    queryFn: () => getAllVehicule(),
+  });
 
-    if (res.success) {
-      setVehicules(res.data); // data est bien un tableau de techniciens
-      toast.success("Vehicule chargés !");
-    } else {
-      toast.error(res.error);
+  // Mettre à jour l'état local quand les données changent
+  React.useEffect(() => {
+    if (vehiculesData?.success && vehiculesData.data) {
+      setVehicules(vehiculesData.data);
     }
-  } catch (error) {
-    console.error(error);
-    toast.error("Erreur lors du chargement des vehicules");
-  } finally {
-    setLoading(false);
-  }
-};
+  }, [vehiculesData]);
 
+  // Gérer les erreurs
+  React.useEffect(() => {
+    if (error) {
+      toast.error("Erreur lors du chargement des véhicules");
+    } else if (vehiculesData?.success) {
+      toast.success("Véhicules chargés !");
+    } else if (vehiculesData?.error) {
+      toast.error(vehiculesData.error);
+    }
+  }, [error, vehiculesData]);
 
-  useEffect(() => {
-    fetchVehicule();
-  }, []);
-
-  // Supprimer un vehicule
+  // Supprimer un véhicule
   const handleDelete = (id: string) => {
     setVehicules(prev => prev.filter(t => t.id !== id));
   };
 
-  // Mettre à jour un vehicule
+  // Mettre à jour un véhicule
   const handleUpdate = (updated: IVehicule) => {
     setVehicules(prev =>
       prev.map(t => (t.id === updated.id ? updated : t))
@@ -51,13 +49,13 @@ const VehiculeList = () => {
 
   return (
     <div className="space-y-6">
-      {loading && (
+      {isPending && (
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
         </div>
       )}
       
-      {!loading && vehicules.length === 0 && (
+      {!isPending && vehicules.length === 0 && (
         <div className="text-center py-12 rounded-2xl bg-white dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-600">
           <EmptyState text="véhicule"/>
         </div>

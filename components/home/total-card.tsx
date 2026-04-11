@@ -8,8 +8,9 @@ import { IVehicule } from "@/service/vehicule/types/vehicule.type";
 import { ITechnicien } from "@/service/techniciens/types/technicien.type";
 import { IIntervention } from "@/service/interventions/types/interventions/intervention.type";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
+import { useQuery } from '@tanstack/react-query';
 
 interface CardTotalProps {
   item: TotalItem;
@@ -44,39 +45,67 @@ const TotalCard = () => {
   const [techniciens, setTechniciens] = useState<ITechnicien[]>([]);
   const [interventions, setInterventions] = useState<IIntervention[]>([]);
 
-  const fetchData = async () => {
-    try {
-      const resVehicules = await getAllVehicule();
-      if (resVehicules.success && "data" in resVehicules) {
-        setVehicules(resVehicules.data);
-      } else {
-        toast.error(resVehicules.error || "Erreur lors du chargement des véhicules");
-      }
+  // Utiliser React Query pour les données
+  const { data: vehiculesData, isPending: vehiculesPending, error: vehiculesError } = useQuery({
+    queryKey: ['vehicules', 'total-card'],
+    queryFn: () => getAllVehicule(),
+  });
 
-      const resTechniciens = await getAllTechniciens();
-      if (resTechniciens.success && "data" in resTechniciens) {
-        setTechniciens(resTechniciens.data);
-      } else {
-        toast.error(resTechniciens.error || "Erreur lors du chargement des techniciens");
-      }
+  const { data: techniciensData, isPending: techniciensPending, error: techniciensError } = useQuery({
+    queryKey: ['techniciens', 'total-card'],
+    queryFn: () => getAllTechniciens(),
+  });
 
-      const resInterventions = await getAllInterventions();
-      if (resInterventions.success && "data" in resInterventions) {
-        setInterventions(resInterventions.data);
-      } else {
-        toast.error(resInterventions.error || "Erreur lors du chargement des interventions");
-      }
-    } catch {
-      toast.error("Erreur inattendue");
+  const { data: interventionsData, isPending: interventionsPending, error: interventionsError } = useQuery({
+    queryKey: ['interventions', 'total-card'],
+    queryFn: () => getAllInterventions(),
+  });
+
+  // Mettre à jour l'état local quand les données changent
+  React.useEffect(() => {
+    if (vehiculesData?.success && vehiculesData.data) {
+      setVehicules(vehiculesData.data);
     }
-  };
+  }, [vehiculesData]);
 
-  useEffect(() => {
-    fetchData();
-    // Rafraîchir chaque 30 secondes
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  React.useEffect(() => {
+    if (techniciensData?.success && techniciensData.data) {
+      setTechniciens(techniciensData.data);
+    }
+  }, [techniciensData]);
+
+  React.useEffect(() => {
+    if (interventionsData?.success && interventionsData.data) {
+      setInterventions(interventionsData.data);
+    }
+  }, [interventionsData]);
+
+  // Gérer les erreurs
+  React.useEffect(() => {
+    if (vehiculesError) toast.error("Erreur lors du chargement des véhicules");
+    if (techniciensError) toast.error("Erreur lors du chargement des techniciens");
+    if (interventionsError) toast.error("Erreur lors du chargement des interventions");
+    
+    if (!vehiculesData?.success && vehiculesData?.error) {
+      toast.error(vehiculesData.error);
+    }
+    if (!techniciensData?.success && techniciensData?.error) {
+      toast.error(techniciensData.error);
+    }
+    if (!interventionsData?.success && interventionsData?.error) {
+      toast.error(interventionsData.error);
+    }
+  }, [vehiculesError, techniciensError, interventionsError, vehiculesData, techniciensData, interventionsData]);
+
+  const isLoading = vehiculesPending || techniciensPending || interventionsPending;
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center p-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
 
   // Calcul des valeurs
   const totalVehicules = vehicules.length;

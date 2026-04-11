@@ -1,9 +1,8 @@
-
 'use server';
 
 import { BASE_URL } from "@/baseurl/baseurl";
 import { createTechnicienSchema, CreateTechnicienSchema } from "./technicien.schema";
-import { ITechnicien } from "./types/technicien.type";
+import { ITechnicien, TechnicienStats } from "./types/technicien.type";
 
 const origine: string = "Actions Technicien";
 
@@ -14,7 +13,9 @@ const TechnicienApi = {
 update: { method: "PATCH", endpoint: (id: string) => `${BASE_URL}/technicien/${id}` },
 
   delete: { method: "DELETE", endpoint: (id: string) => `${BASE_URL}/technicien/${id}` },
+  getTechnicienStats: { method: "GET", endpoint: () => `${BASE_URL}/technicien/statistics` },
 };
+
 
 // Fonction générique pour gérer les fetch JSON
 async function fetchJson<T>(url: string, options: RequestInit): Promise<
@@ -100,4 +101,11 @@ export async function updateTechnicien(id: string, body: CreateTechnicienSchema)
 // DELETE TECHNICIEN
 export async function deleteTechnicien(id: string) {
   return fetchJson(TechnicienApi.delete.endpoint(id), { method: TechnicienApi.delete.method });
+}
+
+// GET TECHNICIEN STATS
+export async function getTechnicienStats(): Promise<{ success: boolean; data?: TechnicienStats; error?: string }> {
+  return fetchJson<TechnicienStats>(TechnicienApi.getTechnicienStats.endpoint(), {
+    method: TechnicienApi.getTechnicienStats.method,
+  });
 }

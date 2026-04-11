@@ -1,5 +1,5 @@
 'use server';
-import { IVehicule } from './types/vehicule.type';
+import { IVehicule, VehiculeStats } from './types/vehicule.type';
 import { CreateVehiculeSchema, createVehiculeSchema } from './vehicule.schema';
 
 
@@ -17,6 +17,7 @@ const VehiculeApi = {
 update: { method: "PATCH", endpoint: (id: string) => `${BASE_URL}/vehicule/${id}` },
 
   delete: { method: "DELETE", endpoint: (id: string) => `${BASE_URL}/vehicule/${id}` },
+  getVehiculeStats: { method: "GET", endpoint: () => `${BASE_URL}/vehicule/statistics` },
 };
 
 // Fonction générique pour gérer les fetch JSON
@@ -103,4 +104,11 @@ export async function updateVehicule(id: string, body: CreateVehiculeSchema) {
 // DELETE TECHNICIEN
 export async function deleteVehicule(id: string) {
   return fetchJson(VehiculeApi.delete.endpoint(id), { method: VehiculeApi.delete.method });
+}
+
+// GET VEHICULE STATS
+export async function getVehiculeStats(): Promise<{ success: boolean; data?: VehiculeStats; error?: string }> {
+  return fetchJson<VehiculeStats>(VehiculeApi.getVehiculeStats.endpoint(), {
+    method: VehiculeApi.getVehiculeStats.method,
+  });
 }

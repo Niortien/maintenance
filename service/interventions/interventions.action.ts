@@ -2,7 +2,7 @@
 
 import { BASE_URL } from "@/baseurl/baseurl";
 import { createInterventionSchema, CreateInterventionType } from "./interventions.schema";
-import { IIntervention, InterventionStats } from "./types/interventions/intervention.type";
+import { IIntervention, InterventionStats, AllStatistics } from "./types/interventions/intervention.type";
 
 const origine: string = "Actions Intervention";
 
@@ -13,8 +13,8 @@ const InterventionApi = {
   update: { method: "PATCH", endpoint: (id: string) => `${BASE_URL}/intervention/${id}` },
   delete: { method: "DELETE", endpoint: (id: string) => `${BASE_URL}/intervention/${id}` },
   getInterventionStats: { method: "GET", endpoint: () => `${BASE_URL}/intervention/statistics` },
+  getAllStatistics: { method: "GET", endpoint: () => `${BASE_URL}/statistics` },
 };
-
 // Fonction générique pour fetch JSON
 async function fetchJson<T>(url: string, options: RequestInit): Promise<
   { success: true; data: T } | { success: false; error: string }
@@ -118,5 +118,12 @@ export async function deleteIntervention(id: string) {
 export async function getInterventionStats(): Promise<{ success: boolean; data?: InterventionStats; error?: string }> {
   return fetchJson<InterventionStats>(InterventionApi.getInterventionStats.endpoint(), {
     method: InterventionApi.getInterventionStats.method,
+  });
+}
+
+// GET ALL STATISTICS
+export async function getAllStatistics(): Promise<{ success: boolean; data?: AllStatistics; error?: string }> {
+  return fetchJson<AllStatistics>(InterventionApi.getAllStatistics.endpoint(), {
+    method: InterventionApi.getAllStatistics.method,
   });
 }
