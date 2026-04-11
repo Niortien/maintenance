@@ -16,6 +16,7 @@ const DashboardMain = () => {
     queryKey: ['statistics', 'all'],
     queryFn: () => getAllStatistics(),
   });
+  
 
   React.useEffect(() => {
     if (error) {
