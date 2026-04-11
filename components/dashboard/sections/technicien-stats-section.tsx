@@ -124,7 +124,7 @@ const TechnicienStatsSection: React.FC<TechnicienStatsSectionProps> = ({ stats }
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-600 text-sm font-medium">Taux d'activité</p>
+              <p className="text-green-600 text-sm font-medium">Taux d&apos;activité</p>
               <p className="text-2xl font-bold text-green-700">{stats.tauxActivite}%</p>
             </div>
             <div className="bg-green-200 rounded-lg p-2">
@@ -186,7 +186,7 @@ const TechnicienStatsSection: React.FC<TechnicienStatsSectionProps> = ({ stats }
 
       {/* Graphique circulaire du taux d'activité */}
       <div className="bg-slate-50 rounded-xl p-6">
-        <h4 className="text-sm font-medium text-slate-600 mb-4">Répartition de l'activité</h4>
+        <h4 className="text-sm font-medium text-slate-600 mb-4">Répartition de l&apos;activité</h4>
         <div className="flex items-center justify-center">
           <div className="relative w-32 h-32">
             <svg className="w-32 h-32 transform -rotate-90">

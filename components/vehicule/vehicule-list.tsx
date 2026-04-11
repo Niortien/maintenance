@@ -12,7 +12,7 @@ const VehiculeList = () => {
   const [vehicules, setVehicules] = useState<IVehicule[]>([]);
 
   // Utiliser React Query pour les véhicules
-  const { data: vehiculesData, isPending, error, refetch } = useQuery({
+  const { data: vehiculesData, isPending, error } = useQuery({
     queryKey: ['vehicules', 'list'],
     queryFn: () => getAllVehicule(),
   });

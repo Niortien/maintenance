@@ -11,7 +11,7 @@ const InterventionList = () => {
   const [interventions, setInterventions] = useState<IIntervention[]>([]);
 
   // Utiliser React Query pour les interventions
-  const { data: interventionsData, isPending, error, refetch } = useQuery({
+  const { data: interventionsData, isPending, error } = useQuery({
     queryKey: ['interventions', 'list'],
     queryFn: () => getAllInterventions(),
   });

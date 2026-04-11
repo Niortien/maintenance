@@ -9,8 +9,6 @@ interface OverviewHeaderProps {
 }
 
 const OverviewHeader: React.FC<OverviewHeaderProps> = ({ stats }) => {
-  const totalGlobal = stats.interventions.total + stats.techniciens.total + stats.vehicules.total;
-  
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -24,7 +22,7 @@ const OverviewHeader: React.FC<OverviewHeaderProps> = ({ stats }) => {
           Dashboard Maintenance
         </h1>
         <p className="text-slate-600 text-lg">
-          Vue d'ensemble complète de votre système de maintenance
+          Vue d&apos;ensemble complète de votre système de maintenance
         </p>
       </div>
 
@@ -98,7 +96,7 @@ const OverviewHeader: React.FC<OverviewHeaderProps> = ({ stats }) => {
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">{stats.techniciens.tauxActivite}%</div>
-            <div className="text-sm text-slate-600">Taux d'Activité</div>
+            <div className="text-sm text-slate-600">Taux d&apos;Activité</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-purple-600">{stats.vehicules.tauxDisponibilite}%</div>

@@ -46,11 +46,6 @@ const TechniciensList = () => {
     );
   };
 
-  // Rafraîchir les données
-  const handleRefresh = () => {
-    refetch();
-  };
-
   return (
     <div className="space-y-6">
       {isPending && (

@@ -4,7 +4,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { getAllStatistics } from '@/service/interventions/interventions.action';
-import { AllStatistics } from '@/service/interventions/types/interventions/intervention.type';
 import { toast } from 'sonner';
 import InterventionStatsSection from './sections/intervention-stats-section';
 import TechnicienStatsSection from './sections/technicien-stats-section';
