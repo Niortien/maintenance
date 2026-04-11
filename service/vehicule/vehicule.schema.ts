@@ -12,9 +12,11 @@ export const createVehiculeSchema = z.object({
     .min(1, { message: "Le numéro de plaque est obligatoire" }),
   
   annee: z
-    .number({
+    .coerce.number({
      message:"L'année du véhicule est obligatoire"
-    }),
+    })
+    .min(1900, { message: "L'année doit être supérieure à 1900" })
+    .max(2030, { message: "L'année ne peut pas dépasser 2030" }),
   
   type: z.string(
     ).min(1, { message: "Le type de véhicule est obligatoire" }

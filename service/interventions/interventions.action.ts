@@ -2,7 +2,7 @@
 
 import { BASE_URL } from "@/baseurl/baseurl";
 import { createInterventionSchema, CreateInterventionType } from "./interventions.schema";
-import { IIntervention } from "./types/interventions/intervention.type";
+import { IIntervention, InterventionStats } from "./types/interventions/intervention.type";
 
 const origine: string = "Actions Intervention";
 
@@ -12,6 +12,7 @@ const InterventionApi = {
   getById: { method: "GET", endpoint: (id: string) => `${BASE_URL}/intervention/${id}` },
   update: { method: "PATCH", endpoint: (id: string) => `${BASE_URL}/intervention/${id}` },
   delete: { method: "DELETE", endpoint: (id: string) => `${BASE_URL}/intervention/${id}` },
+  getInterventionStats: { method: "GET", endpoint: () => `${BASE_URL}/intervention/statistics` },
 };
 
 // Fonction générique pour fetch JSON
@@ -110,5 +111,12 @@ export async function deleteIntervention(id: string) {
   if (!id) return { success: false, error: "ID d'intervention manquant" };
   return fetchJson(InterventionApi.delete.endpoint(id), {
     method: InterventionApi.delete.method,
+  });
+}
+
+// GET INTERVENTION STATS
+export async function getInterventionStats(): Promise<{ success: boolean; data?: InterventionStats; error?: string }> {
+  return fetchJson<InterventionStats>(InterventionApi.getInterventionStats.endpoint(), {
+    method: InterventionApi.getInterventionStats.method,
   });
 }

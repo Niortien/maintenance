@@ -34,3 +34,9 @@ export type CreateInterventionType = {
   createdAt   :string         
   updatedAt :string
 };
+export interface InterventionStats {
+    totalInterventions: number;
+    interventionsEnCours: number;
+    interventionsTerminees: number;
+    interventionsUrgentes: number;
+}

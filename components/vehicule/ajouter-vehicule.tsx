@@ -144,7 +144,7 @@ const AjouterVehiculeDialog = () => {
                 )}
               />
 
-              {/* Téléphone */}
+              {/* Année */}
               <FormField
                 control={form.control}
                 name="annee"
@@ -152,7 +152,14 @@ const AjouterVehiculeDialog = () => {
                   <FormItem>
                     <FormLabel>Année</FormLabel>
                     <FormControl>
-                      <input {...field} className="border p-2 w-full rounded" />
+                      <input
+                        type="number"
+                        min="1900"
+                        max="2030"
+                        {...field}
+                        className="border p-2 w-full rounded"
+                        placeholder="2024"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

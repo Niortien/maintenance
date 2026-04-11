@@ -1,7 +1,7 @@
 'use client'
 
 import { bilanData, BilanItem } from "@/data/bilan.data";
-import { getAllInterventions } from "@/service/interventions/interventions.action";
+import { getAllInterventions, getInterventionStats } from "@/service/interventions/interventions.action";
 import { getAllTechniciens } from "@/service/techniciens/technicien.action";
 import { getAllVehicule } from "@/service/vehicule/vehicule.action";
 import React, { useEffect, useState } from "react";
@@ -10,6 +10,8 @@ import { IIntervention } from "@/service/interventions/types/interventions/inter
 import { ITechnicien } from "@/service/techniciens/types/technicien.type";
 import { IVehicule } from "@/service/vehicule/types/vehicule.type";
 import { motion } from "framer-motion";
+import { useQuery } from '@tanstack/react-query'
+
 
 interface CardBilanProps {
   item: BilanItem;
@@ -19,6 +21,9 @@ interface CardBilanProps {
 
 const CardBilan = ({ item, value, index = 0 }: CardBilanProps) => {
   const isWhiteBg = item.color?.includes("bg-white");
+  
+  // Utiliser les données passées en props plutôt que de faire un appel API
+  // Les statistiques sont calculées dans le composant parent BilanCard
   
   return (
     <motion.div
@@ -40,19 +45,17 @@ const CardBilan = ({ item, value, index = 0 }: CardBilanProps) => {
 };
 
 const BilanCard = () => {
-  const [interventions, setInterventions] = useState<IIntervention[]>([]);
   const [techniciens, setTechniciens] = useState<ITechnicien[]>([]);
   const [vehicules, setVehicules] = useState<IVehicule[]>([]);
 
+  // Utiliser useQuery pour les statistiques d'interventions
+  const { data: statsData, isPending: statsPending, error: statsError } = useQuery({
+    queryKey: ['interventionsstats'],
+    queryFn: () => getInterventionStats(),
+  });
+
   const fetchData = async () => {
     try {
-      const resInterventions = await getAllInterventions();
-      if (resInterventions.success && "data" in resInterventions) {
-        setInterventions(resInterventions.data);
-      } else {
-        toast.error(resInterventions.error || "Erreur lors du chargement des interventions");
-      }
-
       const resTechniciens = await getAllTechniciens();
       if (resTechniciens.success && "data" in resTechniciens) {
         setTechniciens(resTechniciens.data);
@@ -78,11 +81,12 @@ const BilanCard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Calcul des valeurs pour le bilan
-  const totalInterventions = interventions.length;
-  const enCours = interventions.filter((i) => i.statut === "EN_COURS").length;
-  const terminees = interventions.filter((i) => i.statut === "TERMINEE").length;
-  const urgentes = interventions.filter((i) => i.priorite === "URGENTE").length;
+  // Utiliser les données de l'API si disponibles, sinon fallback sur 0
+  const stats = statsData?.success ? statsData.data : null;
+  const totalInterventions = stats?.totalInterventions ?? 0;
+  const enCours = stats?.interventionsEnCours ?? 0;
+  const terminees = stats?.interventionsTerminees ?? 0;
+  const urgentes = stats?.interventionsUrgentes ?? 0;
   const totalTechniciens = techniciens.length;
   const totalVehicules = vehicules.length;
 
@@ -98,12 +102,20 @@ const BilanCard = () => {
         return urgentes;
       case "Total Techniciens":
         return totalTechniciens;
-      case "Total Véhicules":
+      case "Total Vehicules":
         return totalVehicules;
       default:
         return undefined;
     }
   };
+
+  if (statsPending) {
+    return <div className="flex justify-center p-8">Chargement des statistiques...</div>;
+  }
+
+  if (statsError) {
+    return <div className="flex justify-center p-8 text-red-500">Erreur de chargement des statistiques</div>;
+  }
 
   return (
     <div className="flex flex-wrap md:justify-start sm:justify-between lg:justify-between">
