@@ -9,6 +9,7 @@ import InterventionStatsSection from './sections/intervention-stats-section';
 import TechnicienStatsSection from './sections/technicien-stats-section';
 import VehiculeStatsSection from './sections/vehicule-stats-section';
 import OverviewHeader from './sections/overview-header';
+import QuickAccessSection from './sections/quick-access-section';
 
 const DashboardMain = () => {
   const { data: statsData, isPending, error } = useQuery({
@@ -54,6 +55,9 @@ const DashboardMain = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header avec vue d'ensemble */}
         <OverviewHeader stats={stats} />
+
+        {/* Accès rapide */}
+        <QuickAccessSection />
 
         {/* Sections des statistiques */}
         <div className="space-y-8 mt-8">

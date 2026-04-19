@@ -29,6 +29,8 @@ export const createVehiculeSchema = z.object({
   statut: z.string(
     ).min(1, { message: "Le statut est obligatoire" }
   ).toUpperCase(),
+
+  siteId: z.string().optional(),
 });
 
 // ✅ Type inferé pour TypeScript

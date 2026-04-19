@@ -1,21 +1,16 @@
 'use client';
 
 import { ITechnicien } from "@/service/techniciens/types/technicien.type";
-import { IconEditCircle, IconMail, IconTrash, IconUserBolt, IconPhone } from "@tabler/icons-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { deleteTechnicien, updateTechnicien } from "@/service/techniciens/technicien.action";
 import { motion } from "framer-motion";
 import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Mail, Phone, Pencil, Trash2, Wrench } from 'lucide-react';
 
 interface TechniciensCardsProps {
   technicien: ITechnicien;
@@ -71,37 +66,56 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
     }
   };
 
+  const initials = `${technicien.nom[0] ?? ''}${technicien.prenom[0] ?? ''}`.toUpperCase();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.3 }}
-      className="w-full bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6 hover:shadow-2xl hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300"
+      whileHover={{ y: -3, boxShadow: '0 12px 32px rgba(5, 150, 105, 0.15)' }}
+      transition={{ duration: 0.25 }}
+      className="w-full bg-white dark:bg-slate-800 rounded-2xl border border-emerald-100 dark:border-slate-700 overflow-hidden transition-all duration-300"
     >
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-purple-600">
-            <IconUserBolt className="h-6 w-6 text-white" />
+      {/* Bandeau vert en haut */}
+      <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20 text-white font-bold text-base">
+            {initials}
           </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">{technicien.nom} {technicien.prenom}</h3>
-            <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold mt-1">{technicien.specialite}</p>
-            <span className={`text-xs px-3 py-1 rounded-full font-semibold inline-block mt-2 ${getStatusColor(technicien.statut)}`}>
-              {technicien.statut}
-            </span>
+          <div>
+            <p className="font-bold text-white text-base leading-tight">{technicien.nom} {technicien.prenom}</p>
+            <p className="text-emerald-200 text-xs mt-0.5 flex items-center gap-1">
+              <Wrench className="h-3 w-3" />{technicien.specialite}
+            </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          {/* Modification */}
+        <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${getStatusColor(technicien.statut)}`}>
+          {technicien.statut}
+        </span>
+      </div>
+
+      {/* Infos contact */}
+      <div className="px-5 py-4 space-y-2.5">
+        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+          <Mail className="h-4 w-4 text-emerald-600" />
+          <span className="truncate">{technicien.email}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+          <Phone className="h-4 w-4 text-emerald-600" />
+          <span>{technicien.telephone}</span>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-2 px-5 pb-4">
           <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
             <DialogTrigger asChild>
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 hover:bg-purple-200 dark:hover:bg-purple-900/50 p-2 rounded-lg transition"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 py-2 rounded-lg transition text-sm font-medium"
               >
-                <IconEditCircle stroke={2} />
+                <Pencil className="h-4 w-4" /> Modifier
               </motion.button>
             </DialogTrigger>
             <DialogContent>
@@ -159,26 +173,25 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
             </DialogContent>
           </Dialog>
 
-          {/* Suppression */}
           <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
             <DialogTrigger asChild>
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 p-2 rounded-lg transition"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                className="flex items-center justify-center gap-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 p-2 rounded-lg transition"
               >
-                <IconTrash stroke={2} />
+                <Trash2 className="h-4 w-4" />
               </motion.button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <IconTrash className="text-red-600" />
+                <DialogTitle className="flex items-center gap-2 text-red-600">
+                  <Trash2 className="h-5 w-5" />
                   Confirmer la suppression
                 </DialogTitle>
               </DialogHeader>
               <p className="text-slate-600 dark:text-slate-400">
-                Etes-vous sur de vouloir supprimer <strong>{technicien.nom} {technicien.prenom}</strong> ? Cette action est irreversible.
+                Êtes-vous sûr de vouloir supprimer <strong>{technicien.nom} {technicien.prenom}</strong> ? Cette action est irréversible.
               </p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Annuler</Button>
@@ -189,38 +202,6 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
             </DialogContent>
           </Dialog>
         </div>
-      </div>
-
-      {/* Détails avec Cards */}
-      <div className="space-y-3 p-6 border-t border-slate-200 dark:border-slate-700">
-        {/* Specialite */}
-        <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-200 dark:border-purple-700/50">
-          <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold uppercase">Specialite</p>
-          <p className="text-sm font-bold text-purple-900 dark:text-purple-100 mt-1">{technicien.specialite}</p>
-        </div>
-
-        {/* Email */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700/50 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/50">
-            <IconMail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold uppercase">Email</p>
-            <p className="text-sm font-medium text-blue-900 dark:text-blue-100 break-all">{technicien.email}</p>
-          </div>
-        </div>
-
-        {/* Téléphone */}
-        <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-700/50 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/50">
-            <IconPhone className="h-5 w-5 text-green-600 dark:text-green-400" />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs text-green-600 dark:text-green-400 font-semibold uppercase">Téléphone</p>
-            <p className="text-sm font-medium text-green-900 dark:text-green-100">{technicien.telephone}</p>
-          </div>
-        </div>
-      </div>
     </motion.div>
   );
 };

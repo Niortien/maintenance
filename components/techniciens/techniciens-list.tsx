@@ -11,7 +11,7 @@ const TechniciensList = () => {
   const [techniciens, setTechniciens] = useState<ITechnicien[]>([]);
 
   // Utiliser React Query pour les techniciens
-  const { data: techniciensData, isPending, error, refetch } = useQuery({
+  const { data: techniciensData, isPending, error } = useQuery({
     queryKey: ['techniciens', 'list'],
     queryFn: () => getAllTechniciens(),
   });

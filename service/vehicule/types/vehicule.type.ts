@@ -5,7 +5,9 @@ export interface IVehicule{
     annee:number;
     type:string;
     modele:string;
-    statut:string
+    statut:string;
+    siteId?: string | null;
+    site?: { id: string; nom: string; code: string } | null;
 }
 
 export interface VehiculeStats {

@@ -5,9 +5,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Input } from "@/components/ui/input";
 import { IVehicule } from "@/service/vehicule/types/vehicule.type";
 import { deleteVehicule, updateVehicule } from "@/service/vehicule/vehicule.action";
-import { IconEditCircle, IconPackage, IconTrash, IconTruck } from "@tabler/icons-react";
 import { motion } from "framer-motion";
-import { Car, Package, Truck } from "lucide-react";
+import { Car, Package, Truck, Pencil, Trash2, Hash, Calendar, MapPin } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -25,30 +24,27 @@ const VehiculeCards = ({ vehicule, onDelete, onUpdate }: VehiculeCardsProps) => 
 
   const getVehicleIcon = (type: string) => {
     switch (type) {
-      case 'CAMION': return <IconTruck className="h-8 w-8 text-white" />;
-      case 'CAMIONNETTE': return <IconPackage className="h-8 w-8 text-white" />;
-      case 'VOITURE': return <Car className="h-8 w-8 text-white" />;
-      case 'EQUIPEMENT': return <Package className="h-8 w-8 text-white" />;
-      default: return <Truck className="h-8 w-8 text-white" />;
+      case 'CAMION': return <Truck className="h-7 w-7 text-white" />;
+      case 'CAMIONNETTE': return <Package className="h-7 w-7 text-white" />;
+      default: return <Car className="h-7 w-7 text-white" />;
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusConfig = (status: string) => {
     switch (status) {
-      case 'ACTIF': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
-      case 'EN_MAINTENANCE': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
-      case 'INACTIF': return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
-      default: return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+      case 'ACTIF': return { label: 'Actif', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', dot: 'bg-emerald-500' };
+      case 'EN_MAINTENANCE': return { label: 'En maintenance', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', dot: 'bg-amber-500' };
+      case 'INACTIF': return { label: 'Inactif', cls: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', dot: 'bg-red-500' };
+      default: return { label: status, cls: 'bg-slate-100 text-slate-600', dot: 'bg-slate-400' };
     }
   };
 
-  const getTypeColor = (type: string) => {
+  const getTypeGradient = (type: string) => {
     switch (type) {
-      case 'CAMION': return 'from-blue-500 to-blue-600';
-      case 'CAMIONNETTE': return 'from-orange-500 to-orange-600';
-      case 'VOITURE': return 'from-green-500 to-green-600';
-      case 'EQUIPEMENT': return 'from-purple-500 to-purple-600';
-      default: return 'from-slate-500 to-slate-600';
+      case 'CAMION': return 'from-emerald-700 to-emerald-600';
+      case 'CAMIONNETTE': return 'from-teal-700 to-teal-600';
+      case 'VOITURE': return 'from-green-700 to-green-600';
+      default: return 'from-emerald-800 to-emerald-700';
     }
   };
 
@@ -69,7 +65,8 @@ const VehiculeCards = ({ vehicule, onDelete, onUpdate }: VehiculeCardsProps) => 
   const handleUpdateVehicule = async () => {
     setLoading(true);
     try {
-      const res = await updateVehicule(vehicule.id, formData);
+      const payload = { ...formData, siteId: formData.siteId ?? undefined, site: undefined } as Parameters<typeof updateVehicule>[1];
+      const res = await updateVehicule(vehicule.id, payload);
       if (res.success && "data" in res) {
         toast.success("Véhicule mis à jour !");
         onUpdate(res.data as IVehicule);
@@ -80,111 +77,87 @@ const VehiculeCards = ({ vehicule, onDelete, onUpdate }: VehiculeCardsProps) => 
     } finally { setLoading(false); }
   };
 
+  const statusConf = getStatusConfig(vehicule.statut);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.3 }}
-      className="w-full bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-2xl hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300"
+      whileHover={{ y: -3, boxShadow: '0 12px 32px rgba(5, 150, 105, 0.15)' }}
+      transition={{ duration: 0.25 }}
+      className="w-full bg-white dark:bg-slate-800 rounded-2xl border border-emerald-100 dark:border-slate-700 overflow-hidden transition-all duration-300"
     >
-      {/* Header with Icon */}
-      <div className={`bg-gradient-to-r ${getTypeColor(vehicule.type)} px-6 py-4 flex items-center gap-4`}>
-        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
-          {getVehicleIcon(vehicule.type)}
-        </div>
-        <div className="flex-1">
-          <h3 className="text-xl font-bold text-white">{vehicule.nom}</h3>
-          <p className="text-white/80 text-sm">{vehicule.type}</p>
-        </div>
-        <span className={`text-xs px-3 py-1 rounded-full font-semibold ${getStatusColor(vehicule.statut)}`}>
-          {vehicule.statut}
-        </span>
-      </div>
-
-      {/* Content */}
-      <div className="p-6 space-y-4">
-        {/* Détails principaux */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-slate-100 dark:bg-slate-700/50 p-3 rounded-lg">
-            <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold uppercase">Modèle</p>
-            <p className="text-sm font-bold text-slate-900 dark:text-white mt-1">{vehicule.modele}</p>
+      {/* Header coloré */}
+      <div className={`bg-gradient-to-r ${getTypeGradient(vehicule.type)} px-5 py-4 flex items-center justify-between`}>
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20">
+            {getVehicleIcon(vehicule.type)}
           </div>
-          <div className="bg-slate-100 dark:bg-slate-700/50 p-3 rounded-lg">
-            <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold uppercase">Année</p>
-            <p className="text-sm font-bold text-slate-900 dark:text-white mt-1">{vehicule.annee}</p>
+          <div>
+            <p className="font-bold text-white text-base">{vehicule.nom}</p>
+            <p className="text-emerald-200 text-xs">{vehicule.type} · {vehicule.modele}</p>
           </div>
         </div>
-
-        {/* Plaque immatriculation */}
-        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700/50">
-          <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold uppercase mb-2">Immatriculation</p>
-          <p className="text-lg font-mono font-bold text-purple-700 dark:text-purple-400">{vehicule.numero_de_plaque}</p>
+        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${statusConf.cls}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${statusConf.dot}`} />
+          {statusConf.label}
         </div>
       </div>
 
-      {/* Actions Footer */}
-      <div className="flex gap-3 px-6 py-4 bg-slate-50 dark:bg-slate-700/30 border-t border-slate-200 dark:border-slate-700">
-        {/* Update Dialog */}
+      {/* Infos */}
+      <div className="px-5 py-4 grid grid-cols-2 gap-3">
+        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+          <Hash className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+          <span className="font-mono font-semibold text-slate-800 dark:text-white">{vehicule.numero_de_plaque}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+          <Calendar className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+          <span>{vehicule.annee}</span>
+        </div>
+        {vehicule.site && (
+          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 col-span-2">
+            <MapPin className="h-4 w-4 text-amber-500 flex-shrink-0" />
+            <span>{vehicule.site.nom}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-2 px-5 pb-4">
         <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
           <DialogTrigger asChild>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex-1 flex items-center justify-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 py-2 rounded-lg transition font-semibold text-sm"
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+              className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 py-2 rounded-lg transition text-sm font-medium"
             >
-              <IconEditCircle size={18} stroke={2} /> Modifier
+              <Pencil className="h-4 w-4" /> Modifier
             </motion.button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Modifier le véhicule</DialogTitle>
-            </DialogHeader>
+            <DialogHeader><DialogTitle>Modifier le véhicule</DialogTitle></DialogHeader>
             <div className="space-y-4">
-              <div>
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nom</label>
-                <Input
-                  value={formData.nom}
-                  onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Modèle</label>
-                <Input
-                  value={formData.modele}
-                  onChange={(e) => setFormData({ ...formData, modele: e.target.value })}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Plaque</label>
-                <Input
-                  value={formData.numero_de_plaque}
-                  onChange={(e) => setFormData({ ...formData, numero_de_plaque: e.target.value })}
-                  className="mt-1"
-                />
-              </div>
+              {[
+                { label: 'Nom', key: 'nom' },
+                { label: 'Modèle', key: 'modele' },
+                { label: 'Plaque', key: 'numero_de_plaque' },
+              ].map(({ label, key }) => (
+                <div key={key}>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">{label}</label>
+                  <Input value={(formData as unknown as Record<string, string>)[key]}
+                    onChange={(e) => setFormData({ ...formData, [key]: e.target.value })} className="mt-1" />
+                </div>
+              ))}
               <div>
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Type</label>
-                <select
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800"
-                >
-                  <option value="CAMION">CAMION</option>
-                  <option value="CAMIONNETTE">CAMIONNETTE</option>
-                  <option value="VOITURE">VOITURE</option>
-                  <option value="EQUIPEMENT">EQUIPEMENT</option>
+                <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800">
+                  {['CAMION', 'CAMIONNETTE', 'VOITURE', 'EQUIPEMENT'].map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div>
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Statut</label>
-                <select
-                  value={formData.statut}
-                  onChange={(e) => setFormData({ ...formData, statut: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800"
-                >
+                <select value={formData.statut} onChange={(e) => setFormData({ ...formData, statut: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800">
                   <option value="ACTIF">ACTIF</option>
                   <option value="EN_MAINTENANCE">EN MAINTENANCE</option>
                   <option value="INACTIF">INACTIF</option>
@@ -193,41 +166,30 @@ const VehiculeCards = ({ vehicule, onDelete, onUpdate }: VehiculeCardsProps) => 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsUpdateDialogOpen(false)}>Annuler</Button>
-              <Button onClick={handleUpdateVehicule} disabled={loading}>
+              <Button onClick={handleUpdateVehicule} disabled={loading} className="bg-emerald-600 hover:bg-emerald-700 text-white">
                 {loading ? 'Mise à jour...' : 'Mettre à jour'}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Delete Dialog */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <DialogTrigger asChild>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex-1 flex items-center justify-center gap-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 py-2 rounded-lg transition font-semibold text-sm"
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+              className="flex items-center justify-center gap-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 p-2 rounded-lg transition"
             >
-              <IconTrash size={18} stroke={2} /> Supprimer
+              <Trash2 className="h-4 w-4" />
             </motion.button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <IconTrash className="text-red-600" />
-                Confirmer la suppression
-              </DialogTitle>
-            </DialogHeader>
+            <DialogHeader><DialogTitle className="text-red-600">Supprimer le véhicule</DialogTitle></DialogHeader>
             <p className="text-slate-600 dark:text-slate-400">
-              Êtes-vous sûr de vouloir supprimer le véhicule <strong>{vehicule.nom}</strong> ? Cette action est irréversible.
+              Supprimer <strong>{vehicule.nom}</strong> ({vehicule.numero_de_plaque}) ? Cette action est irréversible.
             </p>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Annuler</Button>
-              <Button 
-                variant="destructive" 
-                onClick={handleDeleteVehicule} 
-                disabled={loading}
-              >
+              <Button variant="destructive" onClick={handleDeleteVehicule} disabled={loading}>
                 {loading ? 'Suppression...' : 'Supprimer'}
               </Button>
             </DialogFooter>

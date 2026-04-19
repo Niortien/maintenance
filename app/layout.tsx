@@ -4,6 +4,7 @@ import "./globals.css";
 import Header1 from "@/components/mvpblocks/header-1";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClientProviderWrapper } from "@/components/providers/query-client-provider";
+import { getProfile } from "@/service/auth/auth.action";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,18 +21,22 @@ export const metadata: Metadata = {
   description: "Application de gestion et de maintenance des employés et des activités d'un garage",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const profileRes = await getProfile();
+  const responsable = profileRes.success ? profileRes.data : null;
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <QueryClientProviderWrapper>
-          <Header1 />
+          <Header1 responsable={responsable} />
           {children}
           <Toaster />
         </QueryClientProviderWrapper>
