@@ -122,6 +122,17 @@ export interface IAdminSite {
   _count: { vehicules: number; techniciens: number; rapports: number };
 }
 
+// ─── Admin: responsable de site ──────────────────────────────────────────────
+export interface IAdminResponsable {
+  id: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string | null;
+  createdAt: string;
+  site: { id: string; nom: string; code: string; couleur: string | null };
+}
+
 // ─── Admin: rapport complet ───────────────────────────────────────────────────
 export interface IAdminRapport {
   id: string;

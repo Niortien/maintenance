@@ -51,6 +51,23 @@ export default async function AdminPage() {
               </div>
             </div>
           </a>
+
+          <a
+            href="/admin/responsables"
+            className="group rounded-xl border border-gray-800 bg-gray-900 p-5 hover:border-emerald-600 transition"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-semibold text-white group-hover:text-emerald-300 transition">Responsables de site</p>
+                <p className="mt-0.5 text-xs text-gray-500">Créer et gérer les comptes responsables</p>
+              </div>
+            </div>
+          </a>
         </div>
 
         {/* Aperçu sites */}

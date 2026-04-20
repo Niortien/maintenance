@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { BASE_URL } from '@/baseurl/baseurl';
 import {
-  IAdminAuthResponse, IAdminRapport, IAdminSite,
+  IAdminAuthResponse, IAdminRapport, IAdminResponsable, IAdminSite,
   IAuthResponse, IInterventionMe, IProfileResponse,
   IRapportMe, ISiteStats, ITechnicienMe, IVehiculeMe,
 } from './types/auth.type';
@@ -45,7 +45,7 @@ async function authFetch<T>(
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 export async function login(email: string, password: string) {
-  const result = await authFetch<IAuthResponse>('/auth/admin/login', {
+  const result = await authFetch<IAuthResponse>('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
@@ -186,4 +186,20 @@ export async function adminGetSiteRapports(siteId: string, date?: string) {
 // ─── Admin: détail d'un rapport ───────────────────────────────────────────────
 export async function adminGetRapport(id: string) {
   return adminFetch<IAdminRapport>(`/admin/rapports/${id}`);
+}
+
+// ─── Admin: liste des responsables ───────────────────────────────────────────
+export async function adminGetResponsables() {
+  return adminFetch<IAdminResponsable[]>('/admin/responsables');
+}
+
+// ─── Admin: créer un responsable ─────────────────────────────────────────────
+export async function adminCreateResponsable(data: {
+  nom: string; prenom: string; email: string; password: string;
+  telephone?: string; siteId: string;
+}) {
+  return adminFetch<IAdminResponsable>('/admin/responsables', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 }
