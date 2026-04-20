@@ -671,6 +671,18 @@ export function RapportEditor({ existingRapport }: { existingRapport?: IRapport 
                   onAddManual={() => handleAddManual(cat)}
                 />
               ))}
+
+              {/* Bouton de soumission en bas */}
+              <div className="pt-4 border-t border-gray-200">
+                <button
+                  onClick={handleSave}
+                  disabled={saving || !siteId}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-base font-semibold text-white hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
+                >
+                  <Save className="h-5 w-5" />
+                  <span>{saving ? 'Enregistrement en cours…' : 'Enregistrer le rapport'}</span>
+                </button>
+              </div>
             </div>
 
             {/* Colonne récap */}

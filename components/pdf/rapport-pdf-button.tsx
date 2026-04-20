@@ -24,7 +24,7 @@ export default function RapportPDFButton({ rapport }: Props) {
           title="Télécharger le rapport en PDF"
         >
           <FileDown className="h-4 w-4" />
-          {loading ? '...' : 'PDF'}
+          {loading ? 'Chargement…' : 'Exporter PDF'}
         </button>
       )}
     </PDFDownloadLink>

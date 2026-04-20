@@ -3,6 +3,7 @@
 import { BASE_URL } from "@/baseurl/baseurl";
 import { createInterventionSchema, CreateInterventionType } from "./interventions.schema";
 import { IIntervention, InterventionStats, AllStatistics } from "./types/interventions/intervention.type";
+import { getAuthToken } from '@/service/auth/auth.action';
 
 const origine: string = "Actions Intervention";
 
@@ -20,7 +21,12 @@ async function fetchJson<T>(url: string, options: RequestInit): Promise<
   { success: true; data: T } | { success: false; error: string }
 > {
   try {
-    const response = await fetch(url, options);
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {
+      ...((options.headers as Record<string, string>) ?? {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+    const response = await fetch(url, { ...options, headers, cache: 'no-store' });
 
     if (!response.ok) {
       const errorData: { message?: string } | null = await response.json().catch(() => null);

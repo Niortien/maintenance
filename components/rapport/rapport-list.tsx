@@ -6,25 +6,17 @@ import { toast } from 'sonner';
 import { FileText } from 'lucide-react';
 
 import { getAllRapports } from '@/service/rapport/rapport.action';
-import { getAllSites } from '@/service/site/site.action';
 import { IRapport } from '@/service/rapport/types/rapport.type';
 import RapportCard from './rapport-card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 
 const RapportList = () => {
   const [rapports, setRapports] = useState<IRapport[]>([]);
-  const [filterSiteId, setFilterSiteId] = useState<string>('all');
   const [filterDate, setFilterDate] = useState<string>('');
 
-  const { data: sitesData } = useQuery({
-    queryKey: ['sites', 'list'],
-    queryFn: () => getAllSites(),
-  });
-
   const { isPending, error, data } = useQuery({
-    queryKey: ['rapports', 'list', filterSiteId, filterDate],
-    queryFn: () => getAllRapports(filterSiteId === 'all' ? undefined : filterSiteId, filterDate || undefined),
+    queryKey: ['rapports', 'list', filterDate],
+    queryFn: () => getAllRapports(undefined, filterDate || undefined),
   });
 
   React.useEffect(() => {
@@ -38,23 +30,10 @@ const RapportList = () => {
 
   const handleDelete = (id: string) => setRapports((prev) => prev.filter((r) => r.id !== id));
 
-  const sites = sitesData?.success ? sitesData.data : [];
-
   return (
     <div className="space-y-6">
-      {/* Filtres */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Select value={filterSiteId} onValueChange={setFilterSiteId}>
-          <SelectTrigger className="w-full sm:w-56">
-            <SelectValue placeholder="Tous les sites" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les sites</SelectItem>
-            {sites.map((s) => (
-              <SelectItem key={s.id} value={s.id}>{s.nom} ({s.code})</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Filtre par date */}
+      <div className="flex gap-3">
         <Input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)}
           className="w-full sm:w-48" placeholder="Filtrer par date" />
       </div>
