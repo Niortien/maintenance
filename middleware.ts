@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const PROTECTED = ['/dashboard'];
+const PROTECTED = ['/dashboard', '/equipements'];
 const ADMIN_PROTECTED = ['/admin'];
 const PUBLIC_ONLY = ['/login'];
 const ADMIN_PUBLIC_ONLY = ['/admin/login'];

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FileText, MapPin, Wrench, Car, Users, ArrowRight } from 'lucide-react';
+import { FileText, MapPin, Wrench, Car, Users, ArrowRight, Package } from 'lucide-react';
 import Link from 'next/link';
 
 const pages = [
@@ -49,6 +49,15 @@ const pages = [
     gradient: 'from-green-500 to-emerald-500',
     bg: 'bg-green-50 dark:bg-green-900/20',
     text: 'text-green-600',
+  },
+  {
+    href: '/equipements',
+    label: 'Équipements',
+    description: 'Stock des équipements du site',
+    icon: <Package className="h-7 w-7" />,
+    gradient: 'from-teal-500 to-cyan-500',
+    bg: 'bg-teal-50 dark:bg-teal-900/20',
+    text: 'text-teal-600',
   },
 ];
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Wrench, LayoutDashboard, Car, Users, Briefcase, MapPin, FileText, LogOut } from 'lucide-react';
+import { Menu, X, Wrench, LayoutDashboard, Car, Users, Briefcase, MapPin, FileText, LogOut, Package } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { logout } from '@/service/auth/auth.action';
@@ -23,6 +23,7 @@ const navItems: NavItem[] = [
   { name: 'Tableau de bord', href: '/', icon: LayoutDashboard },
   { name: 'Interventions', href: '/interventions', icon: Briefcase },
   { name: 'Véhicules', href: '/vehicules', icon: Car },
+  { name: 'Équipements', href: '/equipements', icon: Package },
   { name: 'Techniciens', href: '/techniciens', icon: Users },
   { name: 'Sites', href: '/sites', icon: MapPin },
   { name: 'Rapports', href: '/rapports', icon: FileText },
