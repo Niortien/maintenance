@@ -28,7 +28,7 @@ export const createEquipementSchema = z
   .object({
     nom: z.string().min(1, 'Le nom est obligatoire'),
     categorie: z.enum(CATEGORIES_EQUIPEMENT, {
-      errorMap: () => ({ message: 'Catégorie invalide' }),
+      error: () => ({ message: 'Catégorie invalide' }),
     }),
     immatriculation: z.string().optional(),
     statut: z.enum(STATUTS_EQUIPEMENT).default('ACTIF'),

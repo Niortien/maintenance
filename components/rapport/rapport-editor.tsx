@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit2, Check, X, ChevronRight, Save, ArrowLeft } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, Loader2, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
-import { getAllSites } from '@/service/site/site.action';
+import { getMyEquipements } from '@/service/equipement/equipement.action';
+import { getProfile } from '@/service/auth/auth.action';
 import { createRapport } from '@/service/rapport/rapport.action';
 import type {
   CategorieVehicule,
@@ -30,24 +31,40 @@ const CATEGORIE_LABELS: Record<CategorieVehicule, string> = {
   KB: 'KB',
 };
 
+// Category display order in the report
+const CAT_ORDER: CategorieVehicule[] = [
+  'TASSEUR', 'AMPLIROLL', 'BP', 'TRACTEUR', 'KIA', 'VOITURETTE', 'MOTO_TRICYCLE', 'PC', 'KB',
+];
+
+// Extra manual categories (not in IEquipement but valid in rapport)
+const EXTRA_CATEGORIES: CategorieVehicule[] = ['PC', 'KB'];
+
 const STATUT_CONFIG: Record<
   StatutVehiculeRapport,
-  { label: string; color: string; dot: string }
+  { label: string; color: string; activeBorder: string; dot: string }
 > = {
   OPERATIONNEL: {
     label: 'Opérationnel',
     color: 'bg-emerald-100 text-emerald-700',
+    activeBorder: 'border-emerald-400',
     dot: 'bg-emerald-500',
   },
-  EN_PANNE: { label: 'En panne', color: 'bg-red-100 text-red-700', dot: 'bg-red-500' },
+  EN_PANNE: {
+    label: 'En panne',
+    color: 'bg-red-100 text-red-700',
+    activeBorder: 'border-red-400',
+    dot: 'bg-red-500',
+  },
   ACCIDENTE: {
     label: 'Accidenté',
     color: 'bg-orange-100 text-orange-700',
+    activeBorder: 'border-orange-400',
     dot: 'bg-orange-500',
   },
   EN_ATTENTE: {
     label: 'En attente',
     color: 'bg-amber-100 text-amber-700',
+    activeBorder: 'border-amber-400',
     dot: 'bg-amber-500',
   },
 };
@@ -65,258 +82,159 @@ const TYPES_PANNES_LABELS: Record<TypePanne, string> = {
   AUTRE: 'Autre',
 };
 
-const ALL_CATEGORIES: CategorieVehicule[] = [
-  'TASSEUR',
-  'BP',
-  'AMPLIROLL',
-  'TRACTEUR',
-  'KIA',
-  'MOTO_TRICYCLE',
-  'VOITURETTE',
-  'PC',
-  'KB',
-];
-
 const ALL_STATUTS: StatutVehiculeRapport[] = [
-  'OPERATIONNEL',
-  'EN_PANNE',
-  'ACCIDENTE',
-  'EN_ATTENTE',
+  'OPERATIONNEL', 'EN_PANNE', 'ACCIDENTE', 'EN_ATTENTE',
 ];
 
 const ALL_TYPES_PANNES: TypePanne[] = [
-  'MECANIQUE',
-  'AIR',
-  'ELECTRICITE',
-  'SOUDURE',
-  'HYDRAULIQUE',
-  'PNEUMATIQUE',
-  'POMPE_INJECTION',
-  'PNEU',
-  'CARROSSERIE',
-  'AUTRE',
+  'MECANIQUE', 'AIR', 'ELECTRICITE', 'SOUDURE', 'HYDRAULIQUE',
+  'PNEUMATIQUE', 'POMPE_INJECTION', 'PNEU', 'CARROSSERIE', 'AUTRE',
 ];
 
 // ─── Type local ───────────────────────────────────────────────────────────────
 
-export type LigneLocal = {
-  tempId: string;
+type LigneState = {
+  key: string;
   codeVehicule: string;
   immatriculation: string;
   categorie: CategorieVehicule;
   statut: StatutVehiculeRapport;
   typesPannes: TypePanne[];
   description: string;
+  isManual?: boolean;
 };
 
 function mkId() {
   return Math.random().toString(36).slice(2);
 }
 
-function emptyLigne(categorie: CategorieVehicule): LigneLocal {
-  return {
-    tempId: mkId(),
-    codeVehicule: '',
-    immatriculation: '',
-    categorie,
-    statut: 'OPERATIONNEL',
-    typesPannes: [],
-    description: '',
-  };
-}
+// ─── Ligne équipement ─────────────────────────────────────────────────────────
 
-// ─── Formulaire inline ────────────────────────────────────────────────────────
-
-function LigneForm({
-  initial,
-  onSave,
-  onCancel,
-}: {
-  initial: LigneLocal;
-  onSave: (l: LigneLocal) => void;
-  onCancel: () => void;
-}) {
-  const [ligne, setLigne] = useState<LigneLocal>(initial);
-  const showPannes = ligne.statut !== 'OPERATIONNEL';
-
-  function set<K extends keyof LigneLocal>(k: K, v: LigneLocal[K]) {
-    setLigne((prev) => ({ ...prev, [k]: v }));
-  }
-
-  function togglePanne(t: TypePanne) {
-    const cur = ligne.typesPannes;
-    set('typesPannes', cur.includes(t) ? cur.filter((x) => x !== t) : [...cur, t]);
-  }
-
-  return (
-    <div className="rounded-xl border border-emerald-300 bg-emerald-50/60 p-4 space-y-3">
-      {/* Code + immat */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Code véhicule <span className="text-red-500">*</span>
-          </label>
-          <input
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm uppercase focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-400"
-            placeholder="ex: T105"
-            value={ligne.codeVehicule}
-            onChange={(e) => set('codeVehicule', e.target.value.toUpperCase())}
-            autoFocus
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Immatriculation
-          </label>
-          <input
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm uppercase focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-400"
-            placeholder="ex: 5985KT"
-            value={ligne.immatriculation}
-            onChange={(e) => set('immatriculation', e.target.value.toUpperCase())}
-          />
-        </div>
-      </div>
-
-      {/* Statut */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-2">Statut</label>
-        <div className="flex gap-2 flex-wrap">
-          {ALL_STATUTS.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => set('statut', s)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
-                ligne.statut === s
-                  ? STATUT_CONFIG[s].color + ' border-current'
-                  : 'border-gray-200 text-gray-500 hover:border-gray-300 bg-white'
-              }`}
-            >
-              {STATUT_CONFIG[s].label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Types de pannes + description */}
-      {showPannes && (
-        <>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-2">
-              Types de pannes
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {ALL_TYPES_PANNES.map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => togglePanne(t)}
-                  className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
-                    ligne.typesPannes.includes(t)
-                      ? 'bg-red-100 border-red-400 text-red-700 font-medium'
-                      : 'border-gray-300 text-gray-500 hover:bg-gray-100 bg-white'
-                  }`}
-                >
-                  {TYPES_PANNES_LABELS[t]}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Description de la panne
-            </label>
-            <input
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-400"
-              placeholder="ex: Problème de pompe à injection"
-              value={ligne.description}
-              onChange={(e) => set('description', e.target.value)}
-            />
-          </div>
-        </>
-      )}
-
-      {/* Boutons */}
-      <div className="flex justify-end gap-2 pt-1">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 transition bg-white"
-        >
-          <X className="h-3.5 w-3.5" /> Annuler
-        </button>
-        <button
-          type="button"
-          onClick={() => ligne.codeVehicule.trim() && onSave(ligne)}
-          disabled={!ligne.codeVehicule.trim()}
-          className="flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 disabled:opacity-50 transition"
-        >
-          <Check className="h-3.5 w-3.5" /> Valider
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Ligne row ────────────────────────────────────────────────────────────────
-
-function LigneRow({
+function EquipementRow({
   ligne,
-  onEdit,
-  onDelete,
+  onUpdate,
+  onRemove,
 }: {
-  ligne: LigneLocal;
-  onEdit: () => void;
-  onDelete: () => void;
+  ligne: LigneState;
+  onUpdate: (patch: Partial<LigneState>) => void;
+  onRemove?: () => void;
 }) {
-  const statut = STATUT_CONFIG[ligne.statut];
-  const hasPannes = ligne.statut !== 'OPERATIONNEL';
+  const isPanne = ligne.statut !== 'OPERATIONNEL';
+
+  function toggleType(t: TypePanne) {
+    const cur = ligne.typesPannes;
+    onUpdate({ typesPannes: cur.includes(t) ? cur.filter((x) => x !== t) : [...cur, t] });
+  }
 
   return (
-    <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 group transition-colors">
-      <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${statut.dot}`} />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-mono font-bold text-sm text-gray-900">{ligne.codeVehicule}</span>
-          {ligne.immatriculation && (
-            <span className="text-xs text-gray-400 font-mono">({ligne.immatriculation})</span>
+    <div
+      className={`rounded-xl border p-3.5 transition-all ${
+        isPanne
+          ? 'border-red-200 bg-red-50/30'
+          : 'border-gray-100 bg-white hover:border-gray-200'
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className={`mt-1.5 h-2.5 w-2.5 rounded-full shrink-0 ${STATUT_CONFIG[ligne.statut].dot}`}
+        />
+        <div className="flex-1 min-w-0">
+          {/* Code + immat */}
+          {ligne.isManual ? (
+            <div className="flex items-center gap-2 mb-2">
+              <input
+                className="font-mono font-bold text-sm text-gray-900 bg-transparent border-b border-dashed border-gray-300 focus:border-emerald-500 focus:outline-none uppercase w-28"
+                placeholder="ex: PC1477"
+                value={ligne.codeVehicule}
+                onChange={(e) => onUpdate({ codeVehicule: e.target.value.toUpperCase() })}
+              />
+              <input
+                className="text-xs text-gray-400 font-mono bg-transparent border-b border-dashed border-gray-200 focus:border-emerald-400 focus:outline-none uppercase w-24"
+                placeholder="immat."
+                value={ligne.immatriculation}
+                onChange={(e) => onUpdate({ immatriculation: e.target.value.toUpperCase() })}
+              />
+              {onRemove && (
+                <button
+                  type="button"
+                  onClick={onRemove}
+                  className="ml-auto p-1 rounded text-gray-300 hover:text-red-500 hover:bg-red-50 transition"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="font-mono font-bold text-sm text-gray-900">
+                {ligne.codeVehicule}
+              </span>
+              {ligne.immatriculation && (
+                <span className="text-xs text-gray-400 font-mono">
+                  ({ligne.immatriculation})
+                </span>
+              )}
+            </div>
           )}
-          <span
-            className={`ml-auto text-xs font-semibold px-2 py-0.5 rounded-full ${statut.color}`}
-          >
-            {statut.label}
-          </span>
-        </div>
-        {hasPannes && (
-          <div className="mt-1 space-y-0.5">
-            {ligne.typesPannes.length > 0 && (
-              <p className="text-xs text-red-600 font-medium">
-                {ligne.typesPannes.map((t) => TYPES_PANNES_LABELS[t]).join(' · ')}
-              </p>
-            )}
-            {ligne.description && (
-              <p className="text-xs text-gray-500 italic">{ligne.description}</p>
-            )}
+
+          {/* Status selector */}
+          <div className="flex gap-1.5 flex-wrap">
+            {ALL_STATUTS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => onUpdate({ statut: s, typesPannes: [], description: '' })}
+                className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
+                  ligne.statut === s
+                    ? `${STATUT_CONFIG[s].color} ${STATUT_CONFIG[s].activeBorder}`
+                    : 'border-gray-200 text-gray-400 hover:border-gray-300 bg-white'
+                }`}
+              >
+                {STATUT_CONFIG[s].label}
+              </button>
+            ))}
           </div>
-        )}
-      </div>
-      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <button
-          type="button"
-          onClick={onEdit}
-          className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition"
-          title="Modifier"
-        >
-          <Edit2 className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={onDelete}
-          className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition"
-          title="Supprimer"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
+
+          {/* Panne details */}
+          {isPanne && (
+            <div className="mt-3 space-y-2.5">
+              <div>
+                <p className="text-xs font-medium text-gray-500 mb-1.5">
+                  Types de pannes
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {ALL_TYPES_PANNES.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => toggleType(t)}
+                      className={`px-2 py-0.5 rounded-full text-xs border transition-colors ${
+                        ligne.typesPannes.includes(t)
+                          ? 'bg-red-100 border-red-400 text-red-700 font-medium'
+                          : 'border-gray-300 text-gray-400 hover:bg-gray-50 bg-white'
+                      }`}
+                    >
+                      {TYPES_PANNES_LABELS[t]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-gray-500 block mb-1">
+                  Raison / Description <span className="text-red-400">*</span>
+                </label>
+                <textarea
+                  value={ligne.description}
+                  onChange={(e) => onUpdate({ description: e.target.value })}
+                  placeholder="Décrivez le problème…"
+                  rows={2}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-400 resize-none"
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -327,25 +245,22 @@ function LigneRow({
 function CategorySection({
   categorie,
   lignes,
-  onAdd,
-  onEdit,
-  onDelete,
+  onUpdate,
+  onRemove,
+  onAddManual,
 }: {
   categorie: CategorieVehicule;
-  lignes: LigneLocal[];
-  onAdd: (l: LigneLocal) => void;
-  onEdit: (tempId: string, l: LigneLocal) => void;
-  onDelete: (tempId: string) => void;
+  lignes: LigneState[];
+  onUpdate: (key: string, patch: Partial<LigneState>) => void;
+  onRemove: (key: string) => void;
+  onAddManual?: () => void;
 }) {
-  const [adding, setAdding] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-
   const ops = lignes.filter((l) => l.statut === 'OPERATIONNEL').length;
   const total = lignes.length;
+  const isExtraCategory = EXTRA_CATEGORIES.includes(categorie);
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
-      {/* Header catégorie */}
       <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <span className="font-bold text-sm text-gray-800 uppercase tracking-wide">
@@ -354,70 +269,43 @@ function CategorySection({
           {total > 0 && (
             <span
               className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                ops === total ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                ops === total
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-amber-100 text-amber-700'
               }`}
             >
               {ops}/{total}
             </span>
           )}
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setAdding(true);
-            setEditingId(null);
-          }}
-          className="flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-500 transition"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Ajouter
-        </button>
+        {(isExtraCategory || onAddManual) && (
+          <button
+            type="button"
+            onClick={onAddManual}
+            className="flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-500 transition"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Ajouter
+          </button>
+        )}
       </div>
 
-      {/* Lignes */}
-      <div className="px-2 py-1">
-        {total === 0 && !adding && (
+      <div className="p-3 space-y-2">
+        {total === 0 ? (
           <p className="text-xs text-gray-400 text-center py-4 italic">
-            Aucun véhicule — cliquez sur Ajouter
+            {isExtraCategory
+              ? 'Cliquez sur Ajouter pour saisir un équipement'
+              : 'Aucun équipement'}
           </p>
-        )}
-
-        {lignes.map((ligne) =>
-          editingId === ligne.tempId ? (
-            <div key={ligne.tempId} className="py-2">
-              <LigneForm
-                initial={ligne}
-                onSave={(updated) => {
-                  onEdit(ligne.tempId, updated);
-                  setEditingId(null);
-                }}
-                onCancel={() => setEditingId(null)}
-              />
-            </div>
-          ) : (
-            <LigneRow
-              key={ligne.tempId}
+        ) : (
+          lignes.map((ligne) => (
+            <EquipementRow
+              key={ligne.key}
               ligne={ligne}
-              onEdit={() => {
-                setEditingId(ligne.tempId);
-                setAdding(false);
-              }}
-              onDelete={() => onDelete(ligne.tempId)}
+              onUpdate={(patch) => onUpdate(ligne.key, patch)}
+              onRemove={ligne.isManual ? () => onRemove(ligne.key) : undefined}
             />
-          ),
-        )}
-
-        {adding && (
-          <div className="py-2">
-            <LigneForm
-              initial={emptyLigne(categorie)}
-              onSave={(l) => {
-                onAdd(l);
-                setAdding(false);
-              }}
-              onCancel={() => setAdding(false)}
-            />
-          </div>
+          ))
         )}
       </div>
     </div>
@@ -426,14 +314,14 @@ function CategorySection({
 
 // ─── Panel récapitulatif ──────────────────────────────────────────────────────
 
-function RecapPanel({ lignes }: { lignes: LigneLocal[] }) {
+function RecapPanel({ lignes }: { lignes: LigneState[] }) {
   const byCategorie = useMemo(() => {
-    const groups: Partial<Record<CategorieVehicule, LigneLocal[]>> = {};
+    const g: Partial<Record<CategorieVehicule, LigneState[]>> = {};
     for (const l of lignes) {
-      if (!groups[l.categorie]) groups[l.categorie] = [];
-      groups[l.categorie]!.push(l);
+      if (!g[l.categorie]) g[l.categorie] = [];
+      g[l.categorie]!.push(l);
     }
-    return groups;
+    return g;
   }, [lignes]);
 
   const pannes = useMemo(
@@ -441,22 +329,22 @@ function RecapPanel({ lignes }: { lignes: LigneLocal[] }) {
     [lignes],
   );
 
-  const usedCategories = ALL_CATEGORIES.filter(
-    (c) => (byCategorie[c]?.length ?? 0) > 0,
-  );
+  const usedCats = CAT_ORDER.filter((c) => (byCategorie[c]?.length ?? 0) > 0);
 
   return (
     <div className="space-y-4 sticky top-20">
-      {/* Récapitulatif opérationnel */}
+      {/* Récapitulatif */}
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
           Récapitulatif
         </h3>
-        {usedCategories.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-2 italic">Aucun véhicule</p>
+        {usedCats.length === 0 ? (
+          <p className="text-xs text-gray-400 text-center py-2 italic">
+            Aucun équipement
+          </p>
         ) : (
           <div className="space-y-1">
-            {usedCategories.map((cat) => {
+            {usedCats.map((cat) => {
               const ligs = byCategorie[cat] ?? [];
               const ops = ligs.filter((l) => l.statut === 'OPERATIONNEL').length;
               const total = ligs.length;
@@ -490,17 +378,17 @@ function RecapPanel({ lignes }: { lignes: LigneLocal[] }) {
       {pannes.length > 0 && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
           <h3 className="text-xs font-bold uppercase tracking-widest text-red-400 mb-3">
-            Pannes & Indisponibles ({pannes.length})
+            Hors service ({pannes.length})
           </h3>
           <div className="space-y-2">
             {pannes.map((l) => (
               <div
-                key={l.tempId}
+                key={l.key}
                 className="pb-2 border-b border-red-100 last:border-0 last:pb-0"
               >
                 <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="font-mono font-bold text-sm text-red-800">
-                    {l.codeVehicule}
+                    {l.codeVehicule || '—'}
                   </span>
                   {l.immatriculation && (
                     <span className="text-xs text-red-400 font-mono">
@@ -508,9 +396,7 @@ function RecapPanel({ lignes }: { lignes: LigneLocal[] }) {
                     </span>
                   )}
                   <span
-                    className={`ml-auto text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                      STATUT_CONFIG[l.statut].color
-                    }`}
+                    className={`ml-auto text-xs px-1.5 py-0.5 rounded-full font-medium ${STATUT_CONFIG[l.statut].color}`}
                   >
                     {STATUT_CONFIG[l.statut].label}
                   </span>
@@ -537,67 +423,126 @@ function RecapPanel({ lignes }: { lignes: LigneLocal[] }) {
 export function RapportEditor({ existingRapport }: { existingRapport?: IRapport }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+
   const [date, setDate] = useState(
     existingRapport
       ? existingRapport.date.split('T')[0]
       : new Date().toISOString().split('T')[0],
   );
-  const [siteId, setSiteId] = useState(existingRapport?.siteId ?? '');
   const [saving, setSaving] = useState(false);
-
-  const [lignes, setLignes] = useState<LigneLocal[]>(() =>
-    existingRapport?.lignes.map((l) => ({
-      tempId: l.id,
+  const [lignes, setLignes] = useState<LigneState[]>(() => {
+    if (!existingRapport) return [];
+    return existingRapport.lignes.map((l) => ({
+      key: l.id,
       codeVehicule: l.codeVehicule,
       immatriculation: l.immatriculation ?? '',
       categorie: l.categorie,
       statut: l.statut,
       typesPannes: l.typesPannes,
       description: l.description ?? '',
-    })) ?? [],
-  );
+    }));
+  });
+  const [equipInitialized, setEquipInitialized] = useState(!!existingRapport);
 
-  const { data: sitesData } = useQuery({
-    queryKey: ['sites', 'list'],
-    queryFn: () => getAllSites(),
+  // Fetch equipment (only for new rapport)
+  const { data: equipData, isLoading: equipLoading } = useQuery({
+    queryKey: ['equipements', 'my'],
+    queryFn: () => getMyEquipements(),
+    enabled: !existingRapport,
   });
 
-  const sites = sitesData?.success ? sitesData.data : [];
-  const selectedSite = sites.find((s) => s.id === siteId);
+  // Fetch profile for site info
+  const { data: profileData } = useQuery({
+    queryKey: ['profile'],
+    queryFn: () => getProfile(),
+    enabled: !existingRapport,
+  });
 
-  const lignesByCategorie = useMemo(() => {
-    const groups = {} as Record<CategorieVehicule, LigneLocal[]>;
-    for (const cat of ALL_CATEGORIES) groups[cat] = [];
-    for (const l of lignes) groups[l.categorie].push(l);
-    return groups;
+  const equipements = equipData?.success ? equipData.data : [];
+  const profile = profileData?.success ? profileData.data : null;
+
+  // Initialize lignes from equipment once loaded
+  useEffect(() => {
+    if (equipInitialized || equipLoading || !equipData?.success) return;
+    const initial: LigneState[] = equipData.data.map((e) => ({
+      key: e.id,
+      codeVehicule: e.nom,
+      immatriculation: e.immatriculation ?? '',
+      categorie: e.categorie as CategorieVehicule,
+      statut: 'OPERATIONNEL' as StatutVehiculeRapport,
+      typesPannes: [],
+      description: '',
+    }));
+    setLignes(initial);
+    setEquipInitialized(true);
+  }, [equipData, equipLoading, equipInitialized]);
+
+  // Derived site info
+  const siteId =
+    existingRapport?.siteId ?? profile?.site?.id ?? equipements[0]?.siteId ?? '';
+  const siteName = existingRapport?.site?.nom ?? profile?.site?.nom ?? '';
+
+  // Group by category
+  const byCategorie = useMemo(() => {
+    const g = {} as Record<CategorieVehicule, LigneState[]>;
+    for (const c of CAT_ORDER) g[c] = [];
+    for (const l of lignes) g[l.categorie].push(l);
+    return g;
   }, [lignes]);
 
-  const usedCategories = ALL_CATEGORIES.filter(
-    (c) => lignesByCategorie[c].length > 0,
-  );
-  const unusedCategories = ALL_CATEGORIES.filter(
-    (c) => lignesByCategorie[c].length === 0,
-  );
+  const usedCategories = CAT_ORDER.filter((c) => byCategorie[c].length > 0);
+  const extraCategories = EXTRA_CATEGORIES.filter((c) => !usedCategories.includes(c));
 
-  const addLigne = useCallback(
-    (l: LigneLocal) => setLignes((prev) => [...prev, l]),
-    [],
-  );
-  const editLigne = useCallback(
-    (tempId: string, updated: LigneLocal) =>
-      setLignes((prev) =>
-        prev.map((l) => (l.tempId === tempId ? { ...updated, tempId } : l)),
-      ),
-    [],
-  );
-  const deleteLigne = useCallback(
-    (tempId: string) => setLignes((prev) => prev.filter((l) => l.tempId !== tempId)),
-    [],
-  );
+  // Handlers
+  function handleUpdate(key: string, patch: Partial<LigneState>) {
+    setLignes((prev) => prev.map((l) => (l.key === key ? { ...l, ...patch } : l)));
+  }
 
+  function handleRemove(key: string) {
+    setLignes((prev) => prev.filter((l) => l.key !== key));
+  }
+
+  function handleAddManual(categorie: CategorieVehicule) {
+    setLignes((prev) => [
+      ...prev,
+      {
+        key: mkId(),
+        codeVehicule: '',
+        immatriculation: '',
+        categorie,
+        statut: 'EN_PANNE',
+        typesPannes: [],
+        description: '',
+        isManual: true,
+      },
+    ]);
+  }
+
+  // Save
   const handleSave = async () => {
-    if (!siteId) { toast.error('Veuillez sélectionner un site'); return; }
-    if (!date) { toast.error('Veuillez saisir une date'); return; }
+    if (!siteId) {
+      toast.error('Impossible de déterminer le site');
+      return;
+    }
+    if (!date) {
+      toast.error('Veuillez saisir une date');
+      return;
+    }
+    const missing = lignes.filter(
+      (l) => l.statut !== 'OPERATIONNEL' && !l.description.trim(),
+    );
+    if (missing.length > 0) {
+      toast.error(
+        `Description manquante pour : ${missing.map((l) => l.codeVehicule || '(sans code)').join(', ')}`,
+      );
+      return;
+    }
+    const missingCode = lignes.filter((l) => l.isManual && !l.codeVehicule.trim());
+    if (missingCode.length > 0) {
+      toast.error("Certains équipements ajoutés manuellement n'ont pas de code");
+      return;
+    }
+
     setSaving(true);
     try {
       const result = await createRapport({
@@ -612,7 +557,10 @@ export function RapportEditor({ existingRapport }: { existingRapport?: IRapport 
           description: l.description || undefined,
         })),
       });
-      if (!result.success) { toast.error(result.error); return; }
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
       toast.success('Rapport créé avec succès !');
       queryClient.invalidateQueries({ queryKey: ['rapports'] });
       router.push('/rapports');
@@ -638,9 +586,9 @@ export function RapportEditor({ existingRapport }: { existingRapport?: IRapport 
             <p className="text-sm font-semibold text-gray-800 truncate">
               {existingRapport ? 'Modifier le rapport' : 'Nouveau rapport journalier'}
             </p>
-            {selectedSite && (
+            {siteName && (
               <p className="text-xs text-gray-500 truncate">
-                RAPPORT — {selectedSite.nom.toUpperCase()}
+                RAPPORT — {siteName.toUpperCase()}
               </p>
             )}
           </div>
@@ -650,101 +598,87 @@ export function RapportEditor({ existingRapport }: { existingRapport?: IRapport 
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none hidden sm:block"
+              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
             />
-            <select
-              value={siteId}
-              onChange={(e) => setSiteId(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none hidden sm:block"
-            >
-              <option value="">— Site —</option>
-              {sites.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.nom}
-                </option>
-              ))}
-            </select>
             <button
               onClick={handleSave}
               disabled={saving || !siteId}
               className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50 transition"
             >
               <Save className="h-4 w-4" />
-              <span className="hidden sm:inline">
-                {saving ? 'Enregistrement…' : 'Enregistrer'}
-              </span>
+              <span>{saving ? 'Enregistrement…' : 'Enregistrer'}</span>
             </button>
           </div>
-        </div>
-
-        {/* Ligne 2 mobile: date + site */}
-        <div className="sm:hidden flex gap-2 px-4 pb-3">
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
-          />
-          <select
-            value={siteId}
-            onChange={(e) => setSiteId(e.target.value)}
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
-          >
-            <option value="">— Site —</option>
-            {sites.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.nom}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 
       {/* Contenu */}
-      <div className="mx-auto max-w-7xl px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Colonne véhicules */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Catégories avec des véhicules */}
-          {usedCategories.map((cat) => (
-            <CategorySection
-              key={cat}
-              categorie={cat}
-              lignes={lignesByCategorie[cat]}
-              onAdd={addLigne}
-              onEdit={editLigne}
-              onDelete={deleteLigne}
-            />
-          ))}
-
-          {/* Catégories vides — dans un accordéon */}
-          {unusedCategories.length > 0 && (
-            <details className="group">
-              <summary className="cursor-pointer list-none flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 select-none py-2 transition">
-                <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
-                <span className="font-medium">
-                  Autres catégories ({unusedCategories.length})
-                </span>
-              </summary>
-              <div className="mt-3 space-y-3 pl-2">
-                {unusedCategories.map((cat) => (
-                  <CategorySection
-                    key={cat}
-                    categorie={cat}
-                    lignes={[]}
-                    onAdd={addLigne}
-                    onEdit={editLigne}
-                    onDelete={deleteLigne}
-                  />
-                ))}
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        {equipLoading ? (
+          <div className="flex items-center justify-center py-24">
+            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+          </div>
+        ) : equipements.length === 0 && !existingRapport && equipInitialized ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-3 text-center">
+            <AlertCircle className="h-10 w-10 text-amber-500" />
+            <p className="text-gray-600 font-medium">
+              Aucun équipement trouvé pour votre site
+            </p>
+            <p className="text-sm text-gray-400">
+              Ajoutez des équipements avant de créer un rapport
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Colonne équipements */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="rounded-xl bg-blue-50 border border-blue-200 px-4 py-3">
+                <p className="text-sm text-blue-800 font-medium">
+                  Sélectionnez le statut de chaque équipement.
+                  Par défaut, tous sont <strong>opérationnels</strong>.
+                </p>
+                <p className="text-xs text-blue-600 mt-0.5">
+                  Pour les équipements <strong>en panne</strong>,{' '}
+                  <strong>accidentés</strong> ou <strong>en attente</strong>,
+                  cochez le statut et ajoutez une description obligatoire.
+                </p>
               </div>
-            </details>
-          )}
-        </div>
 
-        {/* Colonne récap */}
-        <div>
-          <RecapPanel lignes={lignes} />
-        </div>
+              {/* Categories from equipment DB */}
+              {usedCategories.map((cat) => (
+                <CategorySection
+                  key={cat}
+                  categorie={cat}
+                  lignes={byCategorie[cat]}
+                  onUpdate={handleUpdate}
+                  onRemove={handleRemove}
+                  onAddManual={
+                    EXTRA_CATEGORIES.includes(cat)
+                      ? () => handleAddManual(cat)
+                      : undefined
+                  }
+                />
+              ))}
+
+              {/* Extra categories (PC / KB) always available */}
+              {extraCategories.map((cat) => (
+                <CategorySection
+                  key={cat}
+                  categorie={cat}
+                  lignes={[]}
+                  onUpdate={handleUpdate}
+                  onRemove={handleRemove}
+                  onAddManual={() => handleAddManual(cat)}
+                />
+              ))}
+            </div>
+
+            {/* Colonne récap */}
+            <div>
+              <RecapPanel lignes={lignes} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
