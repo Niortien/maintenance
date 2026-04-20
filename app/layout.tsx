@@ -27,7 +27,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const profileRes = await getProfile();
-  const responsable = profileRes.success ? profileRes.data : null;
+  const responsable = profileRes?.success ? profileRes.data : null;
 
   return (
     <html lang="en">

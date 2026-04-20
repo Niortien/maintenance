@@ -28,6 +28,8 @@ const navItems: NavItem[] = [
   { name: 'Rapports', href: '/rapports', icon: FileText },
 ];
 
+const HIDDEN_ROUTES = ['/', '/login', '/admin'];
+
 export default function Header1({ responsable }: { responsable?: ResponsableInfo | null }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -38,6 +40,9 @@ export default function Header1({ responsable }: { responsable?: ResponsableInfo
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const hide = HIDDEN_ROUTES.some((r) => pathname === r || pathname.startsWith('/admin') || pathname.startsWith('/login'));
+  if (hide) return null;
 
   return (
     <motion.header
