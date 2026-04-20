@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  Document, Page, Text, View, StyleSheet, PDFDownloadLink,
+  Document, Page, Text, View, StyleSheet, PDFDownloadLink, Image,
 } from '@react-pdf/renderer';
 import { IAdminRapport } from '@/service/auth/types/auth.type';
 
@@ -49,10 +49,15 @@ function RapportPDFDoc({ rapport }: { rapport: IAdminRapport }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>Rapport journalier — {rapport.site.nom}</Text>
-        <Text style={styles.subtitle}>
-          {dateStr} · {rapport.site.region ?? ''} · Généré le {new Date().toLocaleDateString('fr-FR')}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 3 }}>
+          <Image src="/assets/images/logogi2e.jpg" style={{ width: 40, height: 40, borderRadius: 4 }} />
+          <View>
+            <Text style={styles.title}>Rapport journalier — {rapport.site.nom}</Text>
+            <Text style={styles.subtitle}>
+              {dateStr} · {rapport.site.region ?? ''} · Généré le {new Date().toLocaleDateString('fr-FR')}
+            </Text>
+          </View>
+        </View>
 
         <View style={styles.statRow}>
           <View style={styles.statBox}>
@@ -102,7 +107,7 @@ function RapportPDFDoc({ rapport }: { rapport: IAdminRapport }) {
           );
         })}
 
-        <Text style={styles.footer}>SATE Maintenance — Rapport généré automatiquement</Text>
+        <Text style={styles.footer}>GI2E Maintenance — Rapport généré automatiquement</Text>
       </Page>
     </Document>
   );

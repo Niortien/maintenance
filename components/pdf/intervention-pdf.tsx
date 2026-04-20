@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { IIntervention } from '@/service/interventions/types/interventions/intervention.type';
 
 // Styles
@@ -189,9 +189,12 @@ export function InterventionPDF({ intervention, technicienNom, vehiculeNom }: Pr
       <Page size="A4" style={styles.page}>
         {/* En-tête */}
         <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.companyName}>MaintenancePro</Text>
-            <Text style={styles.companySubtitle}>Système de gestion de maintenance</Text>
+          <View style={[styles.headerLeft, { flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
+            <Image src="/assets/images/logogi2e.jpg" style={{ width: 44, height: 44, borderRadius: 6 }} />
+            <View>
+              <Text style={styles.companyName}>GI2E Maintenance</Text>
+              <Text style={styles.companySubtitle}>Groupement Ivoire Eco Environnement</Text>
+            </View>
           </View>
           <View style={styles.headerRight}>
             <Text style={styles.docTitle}>Fiche d&apos;Intervention</Text>
@@ -288,7 +291,7 @@ export function InterventionPDF({ intervention, technicienNom, vehiculeNom }: Pr
 
         {/* Footer */}
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>MaintenancePro — Gestion de maintenance</Text>
+          <Text style={styles.footerText}>GI2E Maintenance — Gestion de maintenance</Text>
           <Text style={styles.footerText}>Document généré le {now}</Text>
         </View>
       </Page>

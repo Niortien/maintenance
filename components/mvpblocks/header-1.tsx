@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Wrench, LayoutDashboard, Car, Users, Briefcase, MapPin, FileText, LogOut, Package, AlertTriangle } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Car, Users, Briefcase, MapPin, FileText, LogOut, Package, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { logout } from '@/service/auth/auth.action';
 
@@ -62,11 +63,15 @@ export default function Header1({ responsable }: { responsable?: ResponsableInfo
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400 shadow-md group-hover:bg-amber-300 transition-colors">
-              <Wrench className="h-5 w-5 text-emerald-900" />
-            </div>
+            <Image
+              src="/assets/images/logogi2e.jpg"
+              alt="GI2E Logo"
+              width={40}
+              height={40}
+              className="rounded-lg object-contain"
+            />
             <span className="hidden sm:block text-lg font-bold text-white tracking-tight">
-              Maintenance<span className="text-amber-400">Pro</span>
+              GI2E <span className="text-amber-400">Maintenance</span>
             </span>
           </Link>
 

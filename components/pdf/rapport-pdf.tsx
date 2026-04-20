@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { IRapport, ILigneRapport } from '@/service/rapport/types/rapport.type';
 
 const styles = StyleSheet.create({
@@ -140,9 +140,12 @@ export function RapportPDF({ rapport }: Props) {
       <Page size="A4" orientation="landscape" style={styles.page}>
         {/* En-tête */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.companyName}>MaintenancePro</Text>
-            <Text style={styles.companySubtitle}>Système de gestion de maintenance</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Image src="/assets/images/logogi2e.jpg" style={{ width: 44, height: 44, borderRadius: 6 }} />
+            <View>
+              <Text style={styles.companyName}>GI2E Maintenance</Text>
+              <Text style={styles.companySubtitle}>Groupement Ivoire Eco Environnement</Text>
+            </View>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <Text style={styles.docTitle}>Rapport Journalier</Text>
@@ -220,7 +223,7 @@ export function RapportPDF({ rapport }: Props) {
 
         {/* Footer */}
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>MaintenancePro — {rapport.site.nom}</Text>
+          <Text style={styles.footerText}>GI2E Maintenance — {rapport.site.nom}</Text>
           <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Page ${pageNumber} / ${totalPages}`} />
         </View>
       </Page>
