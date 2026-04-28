@@ -50,7 +50,10 @@ const AjouterSituationDialog = ({ equipements }: Props) => {
       if (file.size > 5 * 1024 * 1024) { toast.error(`${file.name} trop lourd (max 5 Mo)`); continue; }
       setImages((prev) => [...prev, { file, preview: URL.createObjectURL(file) }]);
     }
-    if (files.length > remaining) toast.warning('Maximum 10 images par situation.');
+    if (files.length > remaining) toast('Maximum 10 images par situation.', {
+      icon: '⚠️',
+      style: { background: '#111827', color: '#f9fafb', border: '1px solid #f59e0b', borderRadius: '10px' },
+    });
     e.target.value = '';
   };
 
