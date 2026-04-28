@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { loginAdmin } from '@/service/auth/auth.action';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 
 export function AdminLoginForm() {
   const router = useRouter();

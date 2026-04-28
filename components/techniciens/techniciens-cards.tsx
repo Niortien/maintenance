@@ -2,7 +2,7 @@
 
 import { ITechnicien } from "@/service/techniciens/types/technicien.type";
 import { useState } from "react";
-import { toast } from "sonner";
+import toast from 'react-hot-toast';
 import { deleteTechnicien, updateTechnicien } from "@/service/techniciens/technicien.action";
 import { motion } from "framer-motion";
 import {

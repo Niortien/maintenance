@@ -5,7 +5,7 @@ import { deleteIntervention, updateIntervention } from "@/service/interventions/
 import { IIntervention } from "@/service/interventions/types/interventions/intervention.type";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import toast from 'react-hot-toast';
 import dynamic from "next/dynamic";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,

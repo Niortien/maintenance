@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { ISituation, StatutSituation } from '@/service/situation/types/situation.type';
 import { adminGetSituations } from '@/service/situation/situation.action';
 import AdminSituationCard from '@/components/admin/admin-situation-card';

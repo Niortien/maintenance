@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { ISituation } from '@/service/situation/types/situation.type';
 import { getMySituations } from '@/service/situation/situation.action';
 import { getMyEquipements } from '@/service/equipement/equipement.action';

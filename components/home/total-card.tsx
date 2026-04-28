@@ -9,7 +9,7 @@ import { ITechnicien } from "@/service/techniciens/types/technicien.type";
 import { IIntervention } from "@/service/interventions/types/interventions/intervention.type";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
-import { toast } from "sonner";
+import toast from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 
 interface CardTotalProps {

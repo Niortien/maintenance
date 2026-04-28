@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { MapPin, Pencil, Trash2, Globe, User, Car, Users, FileText, LayoutDashboard } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import TechniciensCards from "./techniciens-cards";
 import { getAllTechniciens } from "@/service/techniciens/technicien.action";
-import { toast } from "sonner";
+import toast from 'react-hot-toast';
 import type { ITechnicien } from "@/service/techniciens/types/technicien.type";
 import { useQuery } from '@tanstack/react-query';
 

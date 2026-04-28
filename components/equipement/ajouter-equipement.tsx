@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, ImagePlus, X } from 'lucide-react';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { createEquipement } from '@/service/equipement/equipement.action';
 import {

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { IEquipement } from '@/service/equipement/types/equipement.type';
 import { getMyEquipements } from '@/service/equipement/equipement.action';
 import { CATEGORIE_LABELS } from '@/service/equipement/equipement.schema';

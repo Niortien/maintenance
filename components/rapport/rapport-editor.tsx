@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { Save, ArrowLeft, AlertCircle, Loader2, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 

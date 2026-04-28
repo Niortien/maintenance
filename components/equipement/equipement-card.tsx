@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pencil, Trash2, ImagePlus, X, Tag, Hash } from 'lucide-react';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { IEquipement } from '@/service/equipement/types/equipement.type';
 import { deleteEquipement, updateEquipement } from '@/service/equipement/equipement.action';
 import {

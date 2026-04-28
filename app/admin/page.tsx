@@ -1,7 +1,7 @@
 import { logoutAdmin } from '@/service/auth/auth.action';
 import { adminGetSites } from '@/service/auth/auth.action';
 import { QueryClientProviderWrapper } from '@/components/providers/query-client-provider';
-import { Toaster } from '@/components/ui/sonner';
+import { Toaster } from 'react-hot-toast';
 import AdminNotificationBell from '@/components/admin/admin-notification-bell';
 
 export const metadata = { title: 'Admin — SATE Maintenance' };
@@ -12,7 +12,11 @@ export default async function AdminPage() {
 
   return (
     <QueryClientProviderWrapper>
-      <Toaster />
+      <Toaster position="top-right" reverseOrder={false} toastOptions={{
+        style: { borderRadius: '10px', background: '#111827', color: '#f9fafb', border: '1px solid #374151', fontSize: '14px' },
+        success: { iconTheme: { primary: '#f59e0b', secondary: '#111827' } },
+        error: { iconTheme: { primary: '#ef4444', secondary: '#111827' } },
+      }} />
       <main className="min-h-screen bg-gray-950 text-white">
         {/* Topbar */}
         <header className="flex items-center justify-between border-b border-gray-800 bg-gray-900 px-6 py-4">
@@ -90,6 +94,24 @@ export default async function AdminPage() {
               <div>
                 <p className="font-semibold text-white group-hover:text-orange-300 transition">Situations</p>
                 <p className="mt-0.5 text-xs text-gray-500">Gérer les pannes et incidents signalés</p>
+              </div>
+            </div>
+          </a>
+
+          <a
+            href="/admin/sites"
+            className="group rounded-xl border border-gray-800 bg-gray-900 p-5 hover:border-blue-600 transition"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 group-hover:bg-blue-500/20 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-semibold text-white group-hover:text-blue-300 transition">Sites</p>
+                <p className="mt-0.5 text-xs text-gray-500">Créer et gérer les sites logistiques</p>
               </div>
             </div>
           </a>

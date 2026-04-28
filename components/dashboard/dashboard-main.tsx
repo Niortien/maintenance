@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { getAllStatistics } from '@/service/interventions/interventions.action';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import InterventionStatsSection from './sections/intervention-stats-section';
 import TechnicienStatsSection from './sections/technicien-stats-section';
 import VehiculeStatsSection from './sections/vehicule-stats-section';

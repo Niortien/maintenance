@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { getAllInterventions } from "@/service/interventions/interventions.action";
 import { IIntervention } from "@/service/interventions/types/interventions/intervention.type";
-import { toast } from "sonner";
+import toast from 'react-hot-toast';
 import InterventionCard from "./interventions-card";
 import { useQuery } from '@tanstack/react-query';
 

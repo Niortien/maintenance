@@ -8,7 +8,7 @@ import { deleteVehicule, updateVehicule } from "@/service/vehicule/vehicule.acti
 import { motion } from "framer-motion";
 import { Car, Package, Truck, Pencil, Trash2, Hash, Calendar, MapPin } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import toast from 'react-hot-toast';
 
 interface VehiculeCardsProps {
   vehicule: IVehicule;

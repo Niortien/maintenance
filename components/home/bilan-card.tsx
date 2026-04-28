@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
+import toast from 'react-hot-toast';
 import { IIntervention } from "@/service/interventions/types/interventions/intervention.type";
 import { ITechnicien } from "@/service/techniciens/types/technicien.type";
 import { IVehicule } from "@/service/vehicule/types/vehicule.type";

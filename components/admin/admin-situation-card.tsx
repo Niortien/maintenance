@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Eye, ChevronLeft, ChevronRight, Package, CalendarDays } from 'lucide-react';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { ISituation, StatutSituation } from '@/service/situation/types/situation.type';
 import { adminChangeSituationStatut } from '@/service/situation/situation.action';
 import { BASE_URL } from '@/baseurl/baseurl';

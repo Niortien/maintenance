@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { IVehicule } from "@/service/vehicule/types/vehicule.type";
 import { getAllVehicule } from "@/service/vehicule/vehicule.action";
-import { toast } from "sonner";
+import toast from 'react-hot-toast';
 import VehiculeCards from "./vehicule-cards";
 import { useQuery } from '@tanstack/react-query';
 import EmptyState from "./empty-state";

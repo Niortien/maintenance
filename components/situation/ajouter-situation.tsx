@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, ImagePlus, X, Trash2, Plus } from 'lucide-react';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { createSituation } from '@/service/situation/situation.action';
 import { IEquipement } from '@/service/equipement/types/equipement.type';

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Pencil, Trash2, Plus, ImagePlus, X, AlertTriangle, Eye, Package, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { ISituation, ICreateBesoin, StatutSituation } from '@/service/situation/types/situation.type';
 import { deleteSituation, updateSituation, changeSituationStatut } from '@/service/situation/situation.action';
 import { BASE_URL } from '@/baseurl/baseurl';

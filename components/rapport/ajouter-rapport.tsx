@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { PlusCircle, FileText, Plus, Trash2 } from 'lucide-react';
 

@@ -1,5 +1,5 @@
 import { QueryClientProviderWrapper } from '@/components/providers/query-client-provider';
-import { Toaster } from '@/components/ui/sonner';
+import { Toaster } from 'react-hot-toast';
 import AdminSituationsIndex from '@/components/admin/admin-situations-index';
 
 export const metadata = { title: 'Situations — Admin SATE' };
@@ -7,7 +7,11 @@ export const metadata = { title: 'Situations — Admin SATE' };
 export default function AdminSituationsPage() {
   return (
     <QueryClientProviderWrapper>
-      <Toaster />
+      <Toaster position="top-right" reverseOrder={false} toastOptions={{
+        style: { borderRadius: '10px', background: '#111827', color: '#f9fafb', border: '1px solid #374151', fontSize: '14px' },
+        success: { iconTheme: { primary: '#f59e0b', secondary: '#111827' } },
+        error: { iconTheme: { primary: '#ef4444', secondary: '#111827' } },
+      }} />
       <main className="min-h-screen bg-gray-950 text-white">
         <div className="mx-auto max-w-7xl px-4 py-8 space-y-8">
           <div>

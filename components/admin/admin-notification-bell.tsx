@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, BellRing, Check, CheckCheck, ExternalLink } from 'lucide-react';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import {
   adminGetUnreadNotifications,
   adminGetNotificationCount,

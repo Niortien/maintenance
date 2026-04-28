@@ -12,7 +12,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import toast from 'react-hot-toast';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {

@@ -1,4 +1,3 @@
-import AjouterSiteDialog from './ajouter-site';
 import SiteList from './site-list';
 
 const SiteIndex = () => {
@@ -8,7 +7,6 @@ const SiteIndex = () => {
         <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Gestion des sites</h1>
         <p className="text-lg text-slate-600 dark:text-slate-400">Gérez les sites logistiques de votre organisation</p>
       </div>
-      <AjouterSiteDialog />
       <SiteList />
     </div>
   );
