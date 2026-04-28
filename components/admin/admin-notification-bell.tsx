@@ -64,8 +64,9 @@ const AdminNotificationBell = () => {
     if (unreadCount > prevCountRef.current && prevCountRef.current >= 0) {
       playNotificationSound();
       const newCount = unreadCount - prevCountRef.current;
-      toast.warning(`${newCount} nouvelle${newCount > 1 ? 's' : ''} situation${newCount > 1 ? 's' : ''} à traiter`, {
+      toast(`${newCount} nouvelle${newCount > 1 ? 's' : ''} situation${newCount > 1 ? 's' : ''} à traiter`, {
         icon: <BellRing className="h-4 w-4 text-amber-500" />,
+        style: { background: '#111827', color: '#f9fafb', border: '1px solid #f59e0b', borderRadius: '10px' },
       });
     }
     prevCountRef.current = unreadCount;
