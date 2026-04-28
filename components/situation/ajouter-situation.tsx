@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
@@ -21,37 +20,51 @@ interface Props {
   equipements: IEquipement[];
 }
 
+interface ImageEntry {
+  file: File;
+  preview: string;
+}
+
 const emptyBesoin = (): ICreateBesoin => ({ designation: '', quantite: 1, prixUnitaire: 0 });
 
 const AjouterSituationDialog = ({ equipements }: Props) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [equipementId, setEquipementId] = useState('');
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [images, setImages] = useState<ImageEntry[]>([]);
   const [besoins, setBesoins] = useState<ICreateBesoin[]>([emptyBesoin()]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   const selectedEquipement = equipements.find((e) => e.id === equipementId);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) {
-      toast.error('Format invalide. Formats acceptés : JPEG, PNG, WebP, GIF');
-      e.target.value = '';
-      return;
+  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    const remaining = 10 - images.length;
+    const toAdd = files.slice(0, remaining);
+    for (const file of toAdd) {
+      if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) {
+        toast.error(`Format invalide pour ${file.name}`);
+        continue;
+      }
+      if (file.size > 5 * 1024 * 1024) { toast.error(`${file.name} trop lourd (max 5 Mo)`); continue; }
+      setImages((prev) => [...prev, { file, preview: URL.createObjectURL(file) }]);
     }
-    if (file.size > 5 * 1024 * 1024) { toast.error('Image trop lourde (max 5 Mo)'); return; }
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    if (files.length > remaining) toast.warning('Maximum 10 images par situation.');
+    e.target.value = '';
+  };
+
+  const removeImage = (idx: number) => {
+    setImages((prev) => {
+      URL.revokeObjectURL(prev[idx].preview);
+      return prev.filter((_, i) => i !== idx);
+    });
   };
 
   const resetForm = () => {
     setEquipementId('');
-    setImageFile(null);
-    setImagePreview(null);
+    images.forEach((img) => URL.revokeObjectURL(img.preview));
+    setImages([]);
     setBesoins([emptyBesoin()]);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -67,21 +80,20 @@ const AjouterSituationDialog = ({ equipements }: Props) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!imageFile) {
-      toast.error("L'image est obligatoire");
+    if (images.length === 0) {
+      toast.error('Au moins une image est obligatoire');
       return;
     }
-
     if (!equipementId) {
-      toast.error("Sélectionnez un équipement");
+      toast.error('Sélectionnez un équipement');
       return;
     }
 
     const validBesoins = besoins.filter((b) => b.designation.trim() !== '');
-
     const fd = new FormData(e.currentTarget);
     fd.set('equipementId', equipementId);
-    fd.set('image', imageFile);
+    fd.delete('image');
+    images.forEach(({ file }) => fd.append('image', file));
     if (validBesoins.length > 0) {
       fd.set('besoinsLogistiques', JSON.stringify(validBesoins));
     }
@@ -93,7 +105,6 @@ const AjouterSituationDialog = ({ equipements }: Props) => {
         toast.success('Situation enregistrée !');
         queryClient.invalidateQueries({ queryKey: ['situations'] });
         resetForm();
-        e.currentTarget.reset();
         setOpen(false);
       } else {
         toast.error(res.error);
@@ -157,22 +168,52 @@ const AjouterSituationDialog = ({ equipements }: Props) => {
             />
           </div>
 
-          {/* Image obligatoire */}
+          {/* Images (multiple, max 10) */}
           <div>
-            <label className="text-sm font-semibold text-slate-700 block mb-1.5">
-              Photo / Image obligatoire *
-            </label>
-            {imagePreview ? (
-              <div className="relative inline-block">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imagePreview} alt="preview" className="h-32 w-auto rounded-xl object-cover border-2 border-orange-200" />
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-sm font-semibold text-slate-700">
+                Photos / Images * <span className="text-slate-400 font-normal">(max 10)</span>
+              </label>
+              {images.length < 10 && (
                 <button
                   type="button"
-                  onClick={() => { setImageFile(null); setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-1 text-xs text-orange-600 hover:text-orange-700 font-medium"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <ImagePlus className="h-3.5 w-3.5" /> Ajouter
                 </button>
+              )}
+            </div>
+
+            {images.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {images.map((img, idx) => (
+                  <div key={idx} className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={img.preview}
+                      alt={`Image ${idx + 1}`}
+                      className="h-20 w-20 object-cover rounded-xl border-2 border-orange-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 shadow"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+                {images.length < 10 && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-20 w-20 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-orange-300 text-orange-500 hover:bg-orange-50 transition text-xs gap-1"
+                  >
+                    <ImagePlus className="h-5 w-5" />
+                    Ajouter
+                  </button>
+                )}
               </div>
             ) : (
               <button
@@ -181,15 +222,17 @@ const AjouterSituationDialog = ({ equipements }: Props) => {
                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed border-orange-300 text-orange-600 hover:bg-orange-50 text-sm font-medium transition"
               >
                 <ImagePlus className="h-4 w-4" />
-                Choisir une image
+                Choisir des images
               </button>
             )}
+
             <input
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif"
+              multiple
               className="hidden"
-              onChange={handleImageChange}
+              onChange={handleImagesChange}
             />
           </div>
 
@@ -210,7 +253,7 @@ const AjouterSituationDialog = ({ equipements }: Props) => {
               {besoins.map((besoin, idx) => (
                 <div key={idx} className="bg-slate-50 rounded-xl p-3 border border-slate-200">
                   <div className="flex items-start gap-2">
-                    <span className="text-xs font-bold text-slate-400 mt-2 w-5 flex-shrink-0">{idx + 1}</span>
+                    <span className="text-xs font-bold text-slate-400 mt-2 w-5 shrink-0">{idx + 1}</span>
                     <div className="flex-1 space-y-2">
                       <Input
                         placeholder="Désignation (ex: Plaquette hydrauliques)"

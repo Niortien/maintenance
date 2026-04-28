@@ -8,10 +8,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Trash2, Plus, ImagePlus, X, AlertTriangle, Eye, Package, CalendarDays } from 'lucide-react';
+import { Pencil, Trash2, Plus, ImagePlus, X, AlertTriangle, Eye, Package, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
-import { ISituation, ICreateBesoin } from '@/service/situation/types/situation.type';
-import { deleteSituation, updateSituation } from '@/service/situation/situation.action';
+import { ISituation, ICreateBesoin, StatutSituation } from '@/service/situation/types/situation.type';
+import { deleteSituation, updateSituation, changeSituationStatut } from '@/service/situation/situation.action';
 import { BASE_URL } from '@/baseurl/baseurl';
 
 interface Props {
@@ -22,13 +22,29 @@ interface Props {
 
 const emptyBesoin = (): ICreateBesoin => ({ designation: '', quantite: 1, prixUnitaire: 0 });
 
+const STATUT_LABELS: Record<StatutSituation, string> = {
+  EN_ATTENTE: 'En attente',
+  EN_COURS: 'En cours',
+  VALIDEE: 'Validée',
+  TERMINEE: 'Terminée',
+};
+
+const STATUT_COLORS: Record<StatutSituation, string> = {
+  EN_ATTENTE: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  EN_COURS: 'bg-blue-100 text-blue-700 border-blue-200',
+  VALIDEE: 'bg-green-100 text-green-700 border-green-200',
+  TERMINEE: 'bg-slate-100 text-slate-600 border-slate-200',
+};
+
 const SituationCard = ({ situation, onDelete, onUpdate }: Props) => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [statutOpen, setStatutOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imgIdx, setImgIdx] = useState(0);
   const [besoins, setBesoins] = useState<ICreateBesoin[]>(() =>
     situation.besoins.length > 0
       ? situation.besoins.map((b) => ({ designation: b.designation, quantite: b.quantite, prixUnitaire: b.prixUnitaire }))
@@ -36,8 +52,13 @@ const SituationCard = ({ situation, onDelete, onUpdate }: Props) => {
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const imageUrl = situation.image ? `${BASE_URL}/${situation.image}` : null;
+  const allImages = situation.images?.length > 0
+    ? situation.images.map((img) => `${BASE_URL}/${img.url}`)
+    : situation.image ? [`${BASE_URL}/${situation.image}`] : [];
+
+  const coverImage = allImages[0] ?? null;
   const totalGeneral = situation.besoins.reduce((acc, b) => acc + b.quantite * b.prixUnitaire, 0);
+  const statut: StatutSituation = situation.statut ?? 'EN_ATTENTE';
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,6 +71,18 @@ const SituationCard = ({ situation, onDelete, onUpdate }: Props) => {
     if (file.size > 5 * 1024 * 1024) { toast.error('Image trop lourde (max 5 Mo)'); return; }
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleChangeStatut = async (newStatut: Extract<StatutSituation, 'EN_COURS' | 'TERMINEE'>) => {
+    setLoading(true);
+    try {
+      const res = await changeSituationStatut(situation.id, newStatut);
+      if (res.success) {
+        toast.success(`Statut mis à jour : ${STATUT_LABELS[newStatut]}`);
+        onUpdate(res.data);
+        setStatutOpen(false);
+      } else toast.error(res.error);
+    } finally { setLoading(false); }
   };
 
   const updateBesoin = (index: number, field: keyof ICreateBesoin, value: string | number) => {
@@ -99,20 +132,30 @@ const SituationCard = ({ situation, onDelete, onUpdate }: Props) => {
     >
       {/* Image + Header */}
       <div className="relative">
-        {imageUrl ? (
+        {coverImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={imageUrl}
+            src={coverImage}
             alt={situation.nom}
             className="w-full h-40 object-cover"
           />
         ) : (
-          <div className="w-full h-40 bg-gradient-to-br from-orange-600 to-amber-500 flex items-center justify-center">
+          <div className="w-full h-40 bg-linear-to-br from-orange-600 to-amber-500 flex items-center justify-center">
             <AlertTriangle className="h-12 w-12 text-white/60" />
           </div>
         )}
+        {/* Statut badge */}
+        <span className={`absolute top-2 right-2 text-xs font-semibold px-2 py-0.5 rounded-full border ${STATUT_COLORS[statut]}`}>
+          {STATUT_LABELS[statut]}
+        </span>
+        {/* Image count */}
+        {allImages.length > 1 && (
+          <span className="absolute top-2 left-2 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full">
+            {allImages.length} photos
+          </span>
+        )}
         {/* Badge titre */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 pt-6 pb-3">
+        <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/70 to-transparent px-4 pt-6 pb-3">
           <p className="font-extrabold text-white text-sm tracking-wider">{situation.nom}</p>
           <p className="text-white/70 text-xs">{situation.equipement.categorie}</p>
         </div>
@@ -128,7 +171,7 @@ const SituationCard = ({ situation, onDelete, onUpdate }: Props) => {
         {/* Résumé besoins */}
         {situation.besoins.length > 0 && (
           <div className="flex items-center gap-2 text-xs text-slate-500">
-            <Package className="h-3.5 w-3.5 text-orange-500 flex-shrink-0" />
+            <Package className="h-3.5 w-3.5 text-orange-500 shrink-0" />
             <span>{situation.besoins.length} besoin{situation.besoins.length > 1 ? 's' : ''} logistique{situation.besoins.length > 1 ? 's' : ''}</span>
             <span className="ml-auto font-bold text-orange-600">
               {totalGeneral.toLocaleString('fr-FR')} FCFA
@@ -138,7 +181,7 @@ const SituationCard = ({ situation, onDelete, onUpdate }: Props) => {
 
         {/* Date */}
         <div className="flex items-center gap-1.5 text-xs text-slate-400">
-          <CalendarDays className="h-3.5 w-3.5 flex-shrink-0" />
+          <CalendarDays className="h-3.5 w-3.5 shrink-0" />
           {new Date(situation.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
         </div>
       </div>
@@ -156,11 +199,32 @@ const SituationCard = ({ situation, onDelete, onUpdate }: Props) => {
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-orange-600 font-extrabold tracking-wider">{situation.nom}</DialogTitle>
+              <span className={`inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full border w-fit ${STATUT_COLORS[statut]}`}>
+                {STATUT_LABELS[statut]}
+              </span>
             </DialogHeader>
             <div className="space-y-4 mt-2">
-              {imageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={imageUrl} alt={situation.nom} className="w-full rounded-xl object-cover max-h-60" />
+              {/* Image gallery */}
+              {allImages.length > 0 && (
+                <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={allImages[imgIdx]} alt={`Photo ${imgIdx + 1}`} className="w-full rounded-xl object-cover max-h-60" />
+                  {allImages.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setImgIdx((i) => (i - 1 + allImages.length) % allImages.length)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full p-1 hover:bg-black/60"
+                      ><ChevronLeft className="h-4 w-4" /></button>
+                      <button
+                        onClick={() => setImgIdx((i) => (i + 1) % allImages.length)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full p-1 hover:bg-black/60"
+                      ><ChevronRight className="h-4 w-4" /></button>
+                      <span className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
+                        {imgIdx + 1} / {allImages.length}
+                      </span>
+                    </>
+                  )}
+                </div>
               )}
               <div>
                 <p className="text-xs font-bold uppercase text-slate-400 mb-1">Description / Diagnostic</p>
@@ -194,7 +258,37 @@ const SituationCard = ({ situation, onDelete, onUpdate }: Props) => {
           </DialogContent>
         </Dialog>
 
-        {/* Edit */}
+        {/* Changer statut (responsable: EN_COURS | TERMINEE) */}
+        {statut !== 'VALIDEE' && (
+          <Dialog open={statutOpen} onOpenChange={setStatutOpen}>
+            <DialogTrigger asChild>
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                className="flex items-center justify-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 px-3 py-2 rounded-lg text-xs font-medium transition">
+                Statut
+              </motion.button>
+            </DialogTrigger>
+            <DialogContent className="max-w-xs">
+              <DialogHeader><DialogTitle>Changer le statut</DialogTitle></DialogHeader>
+              <p className="text-xs text-slate-500 mb-3">Statut actuel : <strong>{STATUT_LABELS[statut]}</strong></p>
+              <div className="space-y-2">
+                {statut !== 'EN_COURS' && statut !== 'TERMINEE' && (
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}
+                    onClick={() => handleChangeStatut('EN_COURS')}>
+                    Passer en cours de traitement
+                  </Button>
+                )}
+                {statut !== 'TERMINEE' && (
+                  <Button className="w-full bg-slate-600 hover:bg-slate-700 text-white" disabled={loading}
+                    onClick={() => handleChangeStatut('TERMINEE')}>
+                    Marquer comme terminée
+                  </Button>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+
+
         <Dialog open={editOpen} onOpenChange={(v) => {
           setEditOpen(v);
           if (!v) {
@@ -254,7 +348,7 @@ const SituationCard = ({ situation, onDelete, onUpdate }: Props) => {
                   {besoins.map((besoin, idx) => (
                     <div key={idx} className="bg-slate-50 rounded-xl p-3 border border-slate-200">
                       <div className="flex items-start gap-2">
-                        <span className="text-xs font-bold text-slate-400 mt-2 w-5 flex-shrink-0">{idx + 1}</span>
+                        <span className="text-xs font-bold text-slate-400 mt-2 w-5 shrink-0">{idx + 1}</span>
                         <div className="flex-1 space-y-2">
                           <Input placeholder="Désignation" value={besoin.designation}
                             onChange={(e) => updateBesoin(idx, 'designation', e.target.value)} className="text-sm" />

@@ -9,7 +9,7 @@ export default async function ResponsableLayout({
   const result = await getProfile();
 
   if (!result.success) {
-    redirect('/login');
+    redirect('/api/auth/clear');
   }
 
   const { responsable } = { responsable: result.data };

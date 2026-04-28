@@ -23,7 +23,7 @@ interface ResponsableInfo {
 const navItems: NavItem[] = [
   { name: 'Tableau de bord', href: '/', icon: LayoutDashboard },
   { name: 'Interventions', href: '/interventions', icon: Briefcase },
-  { name: 'Véhicules', href: '/vehicules', icon: Car },
+  // { name: 'Véhicules', href: '/vehicules', icon: Car },
   { name: 'Équipements', href: '/equipements', icon: Package },
   { name: 'Situations', href: '/situations', icon: AlertTriangle },
   { name: 'Techniciens', href: '/techniciens', icon: Users },
