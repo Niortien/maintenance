@@ -93,10 +93,6 @@ const AdminSituationsIndex = () => {
 export default AdminSituationsIndex;
 
 
-  React.useEffect(() => {
-    if (error) toast.error('Erreur lors du chargement des situations');
-  }, [error]);
-
   const handleUpdate = (updated: ISituation) =>
     setSituations((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
 
