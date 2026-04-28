@@ -1,3 +1,5 @@
+'use client';
+
 import AjouterTechnicien from "./ajouter-technicien";
 import TechniciensList from "./techniciens-list";
 

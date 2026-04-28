@@ -19,6 +19,16 @@ update: { method: "PATCH", endpoint: (id: string) => `${BASE_URL}/vehicule/${id}
   getVehiculeStats: { method: "GET", endpoint: () => `${BASE_URL}/vehicule/statistics` },
 };
 
+function normalizeError(raw: unknown, fallback: string): string {
+  if (typeof raw === 'string') return raw || fallback;
+  if (Array.isArray(raw)) return raw.map(String).join(', ');
+  if (raw && typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>;
+    if ('message' in obj) return normalizeError(obj.message, fallback);
+  }
+  return fallback;
+}
+
 // Fonction générique pour gérer les fetch JSON
 async function fetchJson<T>(url: string, options: RequestInit): Promise<
   { success: true; data: T } | { success: false; error: string }> {
@@ -31,23 +41,17 @@ async function fetchJson<T>(url: string, options: RequestInit): Promise<
     const response = await fetch(url, { ...options, headers, cache: 'no-store' });
 
     if (!response.ok) {
-      const errorData: { message?: string } | null = await response.json().catch(() => null);
+      const errorData: { message?: unknown } | null = await response.json().catch(() => null);
       return {
         success: false,
-        error: errorData?.message || `Erreur côté serveur, origine: ${origine}`,
+        error: normalizeError(errorData?.message, `Erreur côté serveur, origine: ${origine}`),
       };
     }
 
     const data: T = await response.json();
     return { success: true, data };
   } catch (error: unknown) {
-    let message = "Erreur inconnue";
-    if (error instanceof Error) {
-      message = error.message;
-    } else if (typeof error === "string") {
-      message = error;
-    }
-
+    const message = error instanceof Error ? error.message : typeof error === 'string' ? error : 'Erreur inconnue';
     return {
       success: false,
       error: message || `Erreur inattendue dans ${origine}`,

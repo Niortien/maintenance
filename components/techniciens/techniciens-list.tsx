@@ -27,10 +27,8 @@ const TechniciensList = () => {
   React.useEffect(() => {
     if (error) {
       toast.error("Erreur lors du chargement des techniciens");
-    } else if (techniciensData?.success) {
-      toast.success("Techniciens chargés !");
-    } else if (techniciensData?.error) {
-      toast.error(techniciensData.error);
+    } else if (techniciensData && !techniciensData.success) {
+      toast.error(typeof techniciensData.error === 'string' ? techniciensData.error : 'Erreur lors du chargement');
     }
   }, [error, techniciensData]);
 

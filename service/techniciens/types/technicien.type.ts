@@ -6,6 +6,7 @@ email: string;
 telephone: string;
 specialite: string;
 statut: string;
+photo?: string | null;
 }
 
 export interface TechnicienStats {
