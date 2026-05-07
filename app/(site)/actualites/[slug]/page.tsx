@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Playfair_Display } from 'next/font/google';
-import SectionTag from '@/components/gi2e/ui/SectionTag';
 import { ArrowLeft, Calendar, Tag } from 'lucide-react';
 
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });

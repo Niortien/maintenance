@@ -93,7 +93,7 @@ export default function ZoneMap() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="h-2.5 w-2.5 rounded-full bg-[#22a05a]" />
-                    <span className="text-[10px] text-white/60">Côte d'Ivoire</span>
+                    <span className="text-[10px] text-white/60">Côte d&apos;Ivoire</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="h-2.5 w-2.5 rounded-full bg-[#e8b922]" />
