@@ -8,8 +8,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Eye, ChevronLeft, ChevronRight, Package, CalendarDays } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { ISituation, StatutSituation } from '@/service/situation/types/situation.type';
 import { adminChangeSituationStatut } from '@/service/situation/situation.action';
+import { adminMarkNotificationRead } from '@/service/notification/notification.action';
 import { BASE_URL } from '@/baseurl/baseurl';
 
 interface Props {
@@ -42,6 +44,7 @@ const AdminSituationCard = ({ situation, onUpdate }: Props) => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [imgIdx, setImgIdx] = useState(0);
+  const queryClient = useQueryClient();
 
   const statut: StatutSituation = situation.statut ?? 'EN_ATTENTE';
   const allImages = situation.images?.length > 0
@@ -60,6 +63,16 @@ const AdminSituationCard = ({ situation, onUpdate }: Props) => {
         toast.success(`Statut mis à jour : ${STATUT_LABELS[newStatut]}`);
         onUpdate(res.data);
         setDetailOpen(false);
+        // Mark ALL unread notifications linked to this situation as read
+        // Always fetch fresh to avoid stale/empty cache issues
+        const { adminGetUnreadNotifications } = await import('@/service/notification/notification.action');
+        const fresh = await adminGetUnreadNotifications();
+        if (fresh.success) {
+          const linked = fresh.data.filter((n) => n.situationId === situation.id);
+          await Promise.all(linked.map((n) => adminMarkNotificationRead(n.id)));
+        }
+        queryClient.invalidateQueries({ queryKey: ['admin-notif-count'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-notifs-unread'] });
       } else toast.error(res.error);
     } finally { setLoading(false); }
   };

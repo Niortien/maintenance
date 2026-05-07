@@ -31,7 +31,7 @@ const navItems: NavItem[] = [
   { name: 'Rapports', href: '/rapports', icon: FileText },
 ];
 
-const HIDDEN_ROUTES = ['/', '/login', '/admin'];
+const HIDDEN_ROUTES = ['/', '/login', '/admin', '/nous-connaitre', '/solutions', '/zone-intervention', '/carrieres', '/actualites', '/contact'];
 
 export default function Header1({ responsable }: { responsable?: ResponsableInfo | null }) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -44,7 +44,7 @@ export default function Header1({ responsable }: { responsable?: ResponsableInfo
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const hide = HIDDEN_ROUTES.some((r) => pathname === r || pathname.startsWith('/admin') || pathname.startsWith('/login'));
+  const hide = HIDDEN_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/') || pathname.startsWith('/admin') || pathname.startsWith('/login'));
   if (hide) return null;
 
   return (

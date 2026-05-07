@@ -22,6 +22,16 @@ type ApiResult<T> =
   | { success: true; data: T }
   | { success: false; error: string };
 
+function normalizeError(raw: unknown, fallback: string): string {
+  if (typeof raw === 'string') return raw || fallback;
+  if (Array.isArray(raw)) return raw.map(String).join(', ');
+  if (raw && typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>;
+    if ('message' in obj) return normalizeError(obj.message, fallback);
+  }
+  return fallback;
+}
+
 // ─── GET all situations du site ───────────────────────────────────────────────
 export async function getMySituations(): Promise<ApiResult<ISituation[]>> {
   try {
@@ -37,7 +47,7 @@ export async function getMySituations(): Promise<ApiResult<ISituation[]>> {
       const body = await res.text().catch(() => '');
       console.error('[getMySituations] HTTP', res.status, body);
       let msg: string;
-      try { msg = (JSON.parse(body) as { message?: string }).message ?? `Erreur ${res.status}`; }
+      try { msg = normalizeError((JSON.parse(body) as { message?: unknown }).message, `Erreur ${res.status}`); }
       catch { msg = `Erreur ${res.status}`; }
       return { success: false, error: msg };
     }

@@ -35,7 +35,9 @@ function playNotificationSound() {
 const AdminNotificationBell = () => {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<INotification[]>([]);
-  const prevCountRef = useRef<number>(0);
+  // -1 = not yet initialised: skip toast on first mount to avoid re-alerting
+  // for notifications that already existed before the admin opened the page
+  const prevCountRef = useRef<number>(-1);
   const queryClient = useQueryClient();
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -59,9 +61,15 @@ const AdminNotificationBell = () => {
     if (notifsData?.success) setNotifications(notifsData.data);
   }, [notifsData]);
 
-  // Play sound when new notifications arrive
+  // Play sound only when count genuinely increases (not on first mount)
   useEffect(() => {
-    if (unreadCount > prevCountRef.current && prevCountRef.current >= 0) {
+    if (countData === undefined) return; // wait for first response
+    if (prevCountRef.current === -1) {
+      // First real data: just record baseline, no toast
+      prevCountRef.current = unreadCount;
+      return;
+    }
+    if (unreadCount > prevCountRef.current) {
       playNotificationSound();
       const newCount = unreadCount - prevCountRef.current;
       toast(`${newCount} nouvelle${newCount > 1 ? 's' : ''} situation${newCount > 1 ? 's' : ''} à traiter`, {
@@ -70,7 +78,7 @@ const AdminNotificationBell = () => {
       });
     }
     prevCountRef.current = unreadCount;
-  }, [unreadCount]);
+  }, [unreadCount, countData]);
 
   // Close panel on outside click
   useEffect(() => {

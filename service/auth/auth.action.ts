@@ -12,6 +12,16 @@ import {
 const TOKEN_COOKIE = 'auth_token';
 const ADMIN_TOKEN_COOKIE = 'admin_token';
 
+function normalizeError(raw: unknown, fallback: string): string {
+  if (typeof raw === 'string') return raw || fallback;
+  if (Array.isArray(raw)) return raw.map(String).join(', ');
+  if (raw && typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>;
+    if ('message' in obj) return normalizeError(obj.message, fallback);
+  }
+  return fallback;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 export async function getAuthToken(): Promise<string | null> {
   const store = await cookies();
@@ -33,8 +43,8 @@ async function authFetch<T>(
       },
     });
     if (!res.ok) {
-      const err = await res.json().catch(() => null) as { message?: string } | null;
-      return { success: false, error: err?.message ?? `Erreur ${res.status}` };
+      const err = await res.json().catch(() => null) as { message?: unknown } | null;
+      return { success: false, error: normalizeError(err?.message, `Erreur ${res.status}`) };
     }
     const data: T = await res.json();
     return { success: true, data };
@@ -141,8 +151,8 @@ async function adminFetch<T>(
       },
     });
     if (!res.ok) {
-      const err = await res.json().catch(() => null) as { message?: string } | null;
-      return { success: false, error: err?.message ?? `Erreur ${res.status}` };
+      const err = await res.json().catch(() => null) as { message?: unknown } | null;
+      return { success: false, error: normalizeError(err?.message, `Erreur ${res.status}`) };
     }
     const data: T = await res.json();
     return { success: true, data };
