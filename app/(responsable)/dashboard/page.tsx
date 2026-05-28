@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation';
 import { getProfile, getSiteStats, getMyVehicules, getMyTechniciens, getMyInterventions } from '@/service/auth/auth.action';
 import { logout } from '@/service/auth/auth.action';
 import { IVehiculeMe, ITechnicienMe, IInterventionMe } from '@/service/auth/types/auth.type';
+import { getMyEquipements } from '@/service/equipement/equipement.action';
+import { IEquipement } from '@/service/equipement/types/equipement.type';
 import Link from 'next/link';
 
 export const metadata = { title: 'Mon Site — SATE Maintenance' };
@@ -194,12 +196,13 @@ function InterventionSection({ interventions }: { interventions: IInterventionMe
 
 // ─── Page principale ───────────────────────────────────────────────────────────
 export default async function DashboardPage() {
-  const [profileRes, statsRes, vehiculesRes, techniciensRes, interventionsRes] = await Promise.all([
+  const [profileRes, statsRes, vehiculesRes, techniciensRes, interventionsRes, equipementsRes] = await Promise.all([
     getProfile(),
     getSiteStats(),
     getMyVehicules(),
     getMyTechniciens(),
     getMyInterventions(),
+    getMyEquipements(),
   ]);
 
   if (!profileRes.success) redirect('/login');
@@ -210,6 +213,11 @@ export default async function DashboardPage() {
   const vehicules: IVehiculeMe[]         = vehiculesRes.success ? vehiculesRes.data : [];
   const techniciens: ITechnicienMe[]     = techniciensRes.success ? techniciensRes.data : [];
   const interventions: IInterventionMe[] = interventionsRes.success ? interventionsRes.data : [];
+  const equipements: IEquipement[]       = equipementsRes.success ? equipementsRes.data : [];
+
+  const equipTotal       = equipements.length;
+  const equipActifs      = equipements.filter((e) => e.statut === 'ACTIF').length;
+  const equipMaintenance = equipements.filter((e) => e.statut === 'EN_MAINTENANCE').length;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 space-y-10">
@@ -234,18 +242,16 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      {stats && (
-        <section>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-400">Vue d&apos;ensemble</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            <StatCard label="Véhicules"      value={stats.totalVehicules}          couleur={couleur} />
-            <StatCard label="Disponibles"    value={stats.vehiculesActifs}          couleur="#10b981" />
-            <StatCard label="En maintenance" value={stats.vehiculesEnMaintenance}   couleur="#f59e0b" />
-            <StatCard label="Techniciens"    value={stats.totalTechniciens}         couleur={couleur} />
-            <StatCard label="Rapports"       value={stats.totalRapports}            couleur={couleur} />
-          </div>
-        </section>
-      )}
+      <section>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-400">Vue d&apos;ensemble</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <StatCard label="Équipements"     value={equipTotal}         couleur={couleur} />
+          <StatCard label="Opérationnels"   value={equipActifs}        couleur="#10b981" sub={equipTotal > 0 ? `${Math.round((equipActifs / equipTotal) * 100)}% du parc` : undefined} />
+          <StatCard label="En maintenance"  value={equipMaintenance}   couleur="#f59e0b" />
+          <StatCard label="Techniciens"     value={stats?.totalTechniciens ?? techniciens.length}  couleur={couleur} />
+          <StatCard label="Rapports"        value={stats?.totalRapports ?? 0}       couleur={couleur} />
+        </div>
+      </section>
 
       {/* Équipements */}
       {vehicules.length > 0 && <VehiculeSection vehicules={vehicules} couleur={couleur} />}
