@@ -25,6 +25,18 @@ const styles = StyleSheet.create({
   statBox: { flex: 1, padding: '7 10', borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 3, alignItems: 'center' },
   statNum: { fontSize: 16, fontWeight: 'bold' },
   statLabel: { fontSize: 7, color: '#6b7280', marginTop: 2 },
+  // Détail par statut
+  statusGrid: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+  statusCol: { flex: 1, borderRadius: 4, padding: 7 },
+  statusColGreen: { backgroundColor: '#f0fdf4', borderLeftWidth: 2, borderLeftColor: '#10b981' },
+  statusColRed: { backgroundColor: '#fef2f2', borderLeftWidth: 2, borderLeftColor: '#ef4444' },
+  statusColPurple: { backgroundColor: '#f5f3ff', borderLeftWidth: 2, borderLeftColor: '#8b5cf6' },
+  statusColAmber: { backgroundColor: '#fffbeb', borderLeftWidth: 2, borderLeftColor: '#f59e0b' },
+  statusColTitle: { fontSize: 7.5, fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 4 },
+  statusItem: { fontSize: 7, marginBottom: 2, color: '#374151' },
+  statusNote: { fontSize: 6.5, color: '#6b7280', marginLeft: 8, marginBottom: 2 },
+  statusEmpty: { fontSize: 7, color: '#9ca3af' },
+  //
   section: { marginBottom: 10 },
   sectionTitle: { fontSize: 9, fontWeight: 'bold', marginBottom: 5, color: '#374151', textTransform: 'uppercase' },
   tableHeader: { flexDirection: 'row', backgroundColor: '#f3f4f6', borderWidth: 1, borderColor: '#e5e7eb' },
@@ -41,6 +53,12 @@ function RapportPDFDoc({ rapport }: { rapport: IAdminRapport }) {
   const pannes = rapport.lignes.filter((l) => l.statut === 'EN_PANNE').length;
   const accidents = rapport.lignes.filter((l) => l.statut === 'ACCIDENTE').length;
   const attente = rapport.lignes.filter((l) => l.statut === 'EN_ATTENTE').length;
+
+  const lignesOp = rapport.lignes.filter((l) => l.statut === 'OPERATIONNEL');
+  const lignesPanne = rapport.lignes.filter((l) => l.statut === 'EN_PANNE');
+  const lignesAcc = rapport.lignes.filter((l) => l.statut === 'ACCIDENTE');
+  const lignesAtt = rapport.lignes.filter((l) => l.statut === 'EN_ATTENTE');
+
   const categories = [...new Set(rapport.lignes.map((l) => l.categorie))];
   const dateStr = new Date(rapport.date).toLocaleDateString('fr-FR', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
@@ -80,6 +98,77 @@ function RapportPDFDoc({ rapport }: { rapport: IAdminRapport }) {
             <Text style={[styles.statNum, { color: '#6b7280' }]}>{attente}</Text>
             <Text style={styles.statLabel}>En attente</Text>
           </View>
+        </View>
+
+        {/* Détail par statut */}
+        <Text style={[styles.sectionTitle, { marginBottom: 6 }]}>Récapitulatif par statut</Text>
+        <View style={styles.statusGrid}>
+
+          {/* Opérationnels */}
+          <View style={[styles.statusCol, styles.statusColGreen]}>
+            <Text style={[styles.statusColTitle, { color: '#065f46' }]}>Opérationnels ({ops})</Text>
+            {lignesOp.length === 0
+              ? <Text style={styles.statusEmpty}>Aucun véhicule</Text>
+              : lignesOp.map((l) => (
+                <Text key={l.id} style={styles.statusItem}>
+                  • {l.codeVehicule}{l.immatriculation ? ` / ${l.immatriculation}` : ''}
+                </Text>
+              ))
+            }
+          </View>
+
+          {/* En panne */}
+          <View style={[styles.statusCol, styles.statusColRed]}>
+            <Text style={[styles.statusColTitle, { color: '#991b1b' }]}>En panne ({pannes})</Text>
+            {lignesPanne.length === 0
+              ? <Text style={styles.statusEmpty}>Aucun véhicule</Text>
+              : lignesPanne.map((l) => (
+                <View key={l.id} style={{ marginBottom: 3 }}>
+                  <Text style={styles.statusItem}>• {l.codeVehicule}{l.immatriculation ? ` / ${l.immatriculation}` : ''}</Text>
+                  {(l.typesPannes?.length > 0 || l.description) && (
+                    <Text style={styles.statusNote}>
+                      {l.typesPannes?.length > 0 ? l.typesPannes.join(', ') : ''}{l.description ? ` — ${l.description}` : ''}
+                    </Text>
+                  )}
+                </View>
+              ))
+            }
+          </View>
+
+          {/* Accidentés */}
+          <View style={[styles.statusCol, styles.statusColPurple]}>
+            <Text style={[styles.statusColTitle, { color: '#5b21b6' }]}>Accidentés ({accidents})</Text>
+            {lignesAcc.length === 0
+              ? <Text style={styles.statusEmpty}>Aucun véhicule</Text>
+              : lignesAcc.map((l) => (
+                <View key={l.id} style={{ marginBottom: 3 }}>
+                  <Text style={styles.statusItem}>• {l.codeVehicule}{l.immatriculation ? ` / ${l.immatriculation}` : ''}</Text>
+                  {l.description && (
+                    <Text style={styles.statusNote}>{l.description}</Text>
+                  )}
+                </View>
+              ))
+            }
+          </View>
+
+          {/* En attente */}
+          <View style={[styles.statusCol, styles.statusColAmber]}>
+            <Text style={[styles.statusColTitle, { color: '#78350f' }]}>En attente ({attente})</Text>
+            {lignesAtt.length === 0
+              ? <Text style={styles.statusEmpty}>Aucun véhicule</Text>
+              : lignesAtt.map((l) => (
+                <View key={l.id} style={{ marginBottom: 3 }}>
+                  <Text style={styles.statusItem}>• {l.codeVehicule}{l.immatriculation ? ` / ${l.immatriculation}` : ''}</Text>
+                  {(l.typesPannes?.length > 0 || l.description) && (
+                    <Text style={styles.statusNote}>
+                      {l.typesPannes?.length > 0 ? l.typesPannes.join(', ') : ''}{l.description ? ` — ${l.description}` : ''}
+                    </Text>
+                  )}
+                </View>
+              ))
+            }
+          </View>
+
         </View>
 
         {categories.map((cat) => {

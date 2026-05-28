@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SATE Maintenance — Présentation de l'application</title>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f6fa;
+      color: #1a1a2e;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── Print settings ── */
+    @media print {
+      body { background: white; }
+      .page { page-break-after: always; box-shadow: none; margin: 0; border-radius: 0; }
+      .page:last-child { page-break-after: avoid; }
+      @page { size: A4; margin: 0; }
+    }
+
+    /* ── Page container ── */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+      margin: 20px auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Colors ── */
+    :root {
+      --green: #145e38;
+      --green-light: #f0fdf4;
+      --amber: #f59e0b;
+      --blue: #2563eb;
+      --purple: #7c3aed;
+      --orange: #ea580c;
+      --teal: #0d9488;
+      --gray-dark: #111827;
+      --gray-mid: #374151;
+      --gray-light: #f9fafb;
+    }
+
+    /* ════════════════════════════════════════
+       PAGE 1 — COUVERTURE
+    ════════════════════════════════════════ */
+    .cover {
+      background: linear-gradient(135deg, #0d3d22 0%, #145e38 50%, #1a7a4a 100%);
+      color: white;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 60px 40px;
+      gap: 24px;
+    }
+
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 16px;
+    }
+    .cover-badge span.dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      display: inline-block;
+    }
+
+    .cover h1 {
+      font-size: 52px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    .cover h1 span { color: #86efac; }
+
+    .cover .subtitle {
+      font-size: 20px;
+      font-weight: 300;
+      opacity: 0.85;
+      max-width: 500px;
+      margin: 0 auto 24px;
+    }
+
+    .cover .divider {
+      width: 60px; height: 3px;
+      background: var(--amber);
+      border-radius: 2px;
+      margin: 0 auto 24px;
+    }
+
+    .cover .meta {
+      font-size: 13px;
+      opacity: 0.6;
+      margin-top: 40px;
+    }
+
+    .cover-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .cover-pill {
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.15);
+      font-size: 12px;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    /* ════════════════════════════════════════
+       SECTION HEADERS
+    ════════════════════════════════════════ */
+    .page-header {
+      padding: 28px 40px 0;
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+    .section-label::before {
+      content: '';
+      width: 16px; height: 3px;
+      background: var(--green);
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .page-header h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--gray-dark);
+      margin-bottom: 6px;
+    }
+    .page-header p {
+      color: #6b7280;
+      font-size: 14px;
+      max-width: 560px;
+    }
+
+    /* ════════════════════════════════════════
+       CONTENT WRAPPERS
+    ════════════════════════════════════════ */
+    .page-body {
+      padding: 24px 40px 32px;
+      flex: 1;
+    }
+
+    /* ── Page footer (page number) ── */
+    .page-foot {
+      padding: 12px 40px;
+      border-top: 1px solid #f3f4f6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .page-foot strong { color: var(--green); }
+
+    /* ════════════════════════════════════════
+       CARDS
+    ════════════════════════════════════════ */
+    .cards-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .cards-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .cards-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .card {
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #e5e7eb;
+      background: white;
+    }
+
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--gray-dark);
+    }
+    .card p {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .card.highlight {
+      background: linear-gradient(135deg, var(--green) 0%, #1a7a4a 100%);
+      border-color: transparent;
+      color: white;
+    }
+    .card.highlight h3 { color: white; }
+    .card.highlight p { color: rgba(255,255,255,0.8); }
+
+    /* ── Stat cards ── */
+    .stat-card {
+      border-radius: 12px;
+      padding: 20px;
+      color: white;
+      text-align: center;
+    }
+    .stat-card .stat-num {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-card .stat-label {
+      font-size: 12px;
+      opacity: 0.85;
+    }
+
+    /* ── Feature list ── */
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #374151;
+    }
+    .feature-list li .icon {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      margin-top: 1px;
+    }
+
+    /* ── Tag pills ── */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .tag {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* ── Role badge ── */
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Flow diagram ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .flow-step {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+    }
+    .flow-box {
+      border-radius: 10px;
+      padding: 12px 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .flow-arrow {
+      font-size: 18px;
+      color: #9ca3af;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    .flow-label {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    /* ── Status badges ── */
+    .status {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* ── Section divider ── */
+    .divider-line {
+      border: none;
+      border-top: 2px solid #f3f4f6;
+      margin: 20px 0;
+    }
+
+    /* ── Module header ── */
+    .module-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .module-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .module-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gray-dark);
+    }
+    .module-header p {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    /* ── Two-column layout ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* ── Info box ── */
+    .info-box {
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 13px;
+      border-left: 4px solid;
+    }
+    .info-box h4 {
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    /* ── Table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    thead th {
+      background: #f9fafb;
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    tbody td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #f3f4f6;
+      color: #374151;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #fafafa; }
+
+    /* ── Accent strip at top of page ── */
+    .top-strip {
+      height: 5px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 1 — COUVERTURE
+════════════════════════════════════════════════════════ -->
+<div class="page cover">
+  <div class="cover-badge">
+    <span class="dot"></span>
+    Application Web — Next.js · TypeScript · REST API
+  </div>
+
+  <h1>SATE<br/><span>Maintenance</span></h1>
+
+  <div class="subtitle">
+    Plateforme intégrée de gestion et de maintenance logistique pour GI2E — Groupement Ivoire Eco Environnement
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="cover-pills">
+    <span class="cover-pill">🏗️ Gestion des sites</span>
+    <span class="cover-pill">🔧 Interventions</span>
+    <span class="cover-pill">🚛 Véhicules</span>
+    <span class="cover-pill">👷 Techniciens</span>
+    <span class="cover-pill">📦 Équipements</span>
+    <span class="cover-pill">📊 Rapports PDF</span>
+    <span class="cover-pill">⚠️ Situations</span>
+    <span class="cover-pill">🔔 Notifications temps réel</span>
+  </div>
+
+  <div class="meta">
+    Préparé par l'équipe technique &nbsp;·&nbsp; Mai 2026
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 2 — VUE D'ENSEMBLE
+════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="top-strip" style="background:linear-gradient(90deg,#145e38,#1a7a4a)"></div>
+
+  <div class="page-header">
+    <div class="section-label">Introduction</div>
+    <h2>Vue d'ensemble de l'application</h2>
+    <p>SATE Maintenance est une plateforme web à deux composantes complémentaires : un site vitrine public et une application de gestion interne.</p>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Deux parties principales -->
+    <div class="two-col" style="margin-bottom:24px;">
+
+      <div class="card" style="border-top:4px solid #145e38;">
+        <div class="card-icon" style="background:#f0fdf4; color:#145e38;">🌿</div>
+        <h3>Site vitrine GI2E</h3>
+        <p>Portail public de présentation de l'entreprise GI2E, ses services, son implantation géographique et ses actualités.</p>
+        <div class="tags" style="margin-top:12px;">
+          <span class="tag" style="background:#f0fdf4;color:#145e38;">Public</span>
+          <span class="tag" style="background:#f0fdf4;color:#145e38;">Sans authentification</span>
+        </div>
+      </div>
+
+      <div class="card" style="border-top:4px solid #2563eb;">
+        <div class="card-icon" style="background:#eff6ff; color:#2563eb;">⚙️</div>
+        <h3>Application de gestion SATE</h3>
+        <p>Outil interne réservé aux responsables de site et aux administrateurs pour gérer toute l'activité opérationnelle.</p>
+        <div class="tags" style="margin-top:12px;">
+          <span class="tag" style="background:#eff6ff;color:#2563eb;">Authentifié</span>
+          <span class="tag" style="background:#eff6ff;color:#2563eb;">Multi-rôles</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stack technique -->
+    <div class="info-box" style="background:#f9fafb; border-color:#145e38; margin-bottom:20px;">
+      <h4 style="color:#145e38;">🛠️ Stack technique</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span class="tag" style="background:#e0f2fe;color:#0369a1;">Next.js 14 (App Router)</span>
+        <span class="tag" style="background:#e0e7ff;color:#4338ca;">TypeScript</span>
+        <span class="tag" style="background:#fef3c7;color:#92400e;">Tailwind CSS</span>
+        <span class="tag" style="background:#fce7f3;color:#9d174d;">shadcn/ui</span>
+        <span class="tag" style="background:#dcfce7;color:#166534;">TanStack Query</span>
+        <span class="tag" style="background:#f3e8ff;color:#6b21a8;">Framer Motion</span>
+        <span class="tag" style="background:#fff7ed;color:#9a3412;">@react-pdf/renderer</span>
+        <span class="tag" style="background:#f0fdf4;color:#14532d;">React Hot Toast</span>
+      </div>
+    </div>
+
+    <!-- Trois rôles utilisateurs -->
+    <div class="section-label" style="margin-bottom:10px;">Profils utilisateurs</div>
+    <div class="three-col">
+      <div class="card" style="text-align:center;border-top:3px solid #f59e0b;">
+        <div style="font-size:28px;margin-bottom:8px;">🔑</div>
+        <h3>Administrateur</h3>
+        <p>Accès complet à l'espace <code>/admin</code>. Supervise tous les sites, gère les responsables et consulte toutes les données.</p>
+        <div style="margin-top:10px;">
+          <span class="role-badge" style="background:#fef3c7;color:#92400e;">Super Admin</span>
+        </div>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid #2563eb;">
+        <div style="font-size:28px;margin-bottom:8px;">👤</div>
+        <h3>Responsable de site</h3>
+        <p>Accès à son site uniquement. Gère les opérations quotidiennes : rapports, interventions, véhicules, etc.</p>
+        <div style="margin-top:10px;">
+          <span class="role-badge" style="background:#eff6ff;color:#1d4ed8;">Site Manager</span>
+        </div>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid #145e38;">
+        <div style="font-size:28px;margin-bottom:8px;">🌐</div>
+        <h3>Visiteur public</h3>
+        <p>Accès libre au site vitrine GI2E. Peut consulter les services, actualités, zones d'intervention et contacts.</p>
+        <div style="margin-top:10px;">
+          <span class="role-badge" style="background:#f0fdf4;color:#145e38;">Public</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-foot">
+    <span><strong>SATE Maintenance</strong> — Présentation technique</span>
+    <span>Page 2</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 3 — SITE VITRINE GI2E
+════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="top-strip" style="background:linear-gradient(90deg,#0d3d22,#145e38)"></div>
+
+  <div class="page-header">
+    <div class="section-label">Partie 1</div>
+    <h2>Site vitrine — GI2E</h2>
+    <p>Portail public de présentation du Groupement Ivoire Eco Environnement, pionnier de la gestion durable des déchets en Côte d'Ivoire depuis 2013.</p>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Chiffres clés GI2E -->
+    <div class="cards-grid cols-3" style="margin-bottom:20px; gap:12px;">
+      <div class="stat-card" style="background:linear-gradient(135deg,#145e38,#1a7a4a);">
+        <div class="stat-num">2 500+</div>
+        <div class="stat-label">Emplois créés</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#0369a1,#0284c7);">
+        <div class="stat-num">150 000+</div>
+        <div class="stat-label">Tonnes collectées</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#b45309,#d97706);">
+        <div class="stat-num">7</div>
+        <div class="stat-label">Villes desservies</div>
+      </div>
+    </div>
+
+    <!-- Sections de la page d'accueil -->
+    <div class="section-label" style="margin-bottom:10px;">Sections de la page d'accueil</div>
+    <div class="two-col" style="margin-bottom:18px;">
+      <ul class="feature-list">
+        <li>
+          <span class="icon" style="background:#f0fdf4;color:#145e38;">🦸</span>
+          <span><strong>Hero</strong> — Bandeau principal avec slogan, statistiques et photo de flotte</span>
+        </li>
+        <li>
+          <span class="icon" style="background:#eff6ff;color:#2563eb;">📊</span>
+          <span><strong>Statistiques</strong> — Chiffres clés animés (emplois, tonnes, villes)</span>
+        </li>
+        <li>
+          <span class="icon" style="background:#fef3c7;color:#b45309;">ℹ️</span>
+          <span><strong>À propos</strong> — Histoire et valeurs de GI2E depuis 2013</span>
+        </li>
+        <li>
+          <span class="icon" style="background:#f3e8ff;color:#7c3aed;">🛎️</span>
+          <span><strong>Services</strong> — 3 activités : collectivités, entreprises, BTP</span>
+        </li>
+      </ul>
+      <ul class="feature-list">
+        <li>
+          <span class="icon" style="background:#fef3c7;color:#b45309;">🗺️</span>
+          <span><strong>Zone de couverture</strong> — Carte interactive des zones d'intervention</span>
+        </li>
+        <li>
+          <span class="icon" style="background:#f0fdf4;color:#145e38;">💬</span>
+          <span><strong>Témoignages</strong> — Retours clients et partenaires</span>
+        </li>
+        <li>
+          <span class="icon" style="background:#eff6ff;color:#2563eb;">📰</span>
+          <span><strong>Actualités</strong> — Prévisualisation des dernières nouvelles</span>
+        </li>
+        <li>
+          <span class="icon" style="background:#fff7ed;color:#c2410c;">🤝</span>
+          <span><strong>Partenaires & CTA</strong> — Logos partenaires et appel à l'action</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Pages du site GI2E -->
+    <div class="section-label" style="margin-bottom:10px;">Pages disponibles</div>
+    <table>
+      <thead>
+        <tr>
+          <th>URL</th>
+          <th>Page</th>
+          <th>Contenu</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>/</code></td>
+          <td>Accueil</td>
+          <td>Page principale avec toutes les sections de présentation</td>
+        </tr>
+        <tr>
+          <td><code>/nous-connaitre</code></td>
+          <td>Nous connaître</td>
+          <td>Histoire, mission, valeurs et équipe dirigeante</td>
+        </tr>
+        <tr>
+          <td><code>/solutions</code></td>
+          <td>Solutions</td>
+          <td>Détail des 3 activités (collectivités, entreprises, BTP)</td>
+        </tr>
+        <tr>
+          <td><code>/zone-intervention</code></td>
+          <td>Zone d'intervention</td>
+          <td>Carte et liste des villes couvertes en Côte d'Ivoire et Togo</td>
+        </tr>
+        <tr>
+          <td><code>/actualites</code></td>
+          <td>Actualités</td>
+          <td>Articles et nouvelles de l'entreprise</td>
+        </tr>
+        <tr>
+          <td><code>/carrieres</code></td>
+          <td>Carrières</td>
+          <td>Offres d'emploi et candidatures</td>
+        </tr>
+        <tr>
+          <td><code>/contact</code></td>
+          <td>Contact</td>
+          <td>Formulaire de contact et informations</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Services GI2E -->
+    <div class="three-col" style="margin-top:20px;">
+      <div class="card" style="border-top:3px solid #145e38;">
+        <div class="card-icon" style="background:#f0fdf4;color:#145e38;">🏘️</div>
+        <h3>Salubrité des collectivités</h3>
+        <p>Collecte, nettoiement, transport, désherbage des espaces publics pour les communes.</p>
+      </div>
+      <div class="card" style="border-top:3px solid #d97706;">
+        <div class="card-icon" style="background:#fefce8;color:#d97706;">🏭</div>
+        <h3>Salubrité des entreprises</h3>
+        <p>Gestion des déchets industriels, organiques et recyclables pour les entreprises.</p>
+      </div>
+      <div class="card" style="border-top:3px solid #374151;">
+        <div class="card-icon" style="background:#f9fafb;color:#374151;">🏗️</div>
+        <h3>Bâtiment & Travaux Publics</h3>
+        <p>Évacuation des gravats, assainissement de chantiers et gestion des déchets BTP.</p>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-foot">
+    <span><strong>SATE Maintenance</strong> — Présentation technique</span>
+    <span>Page 3</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 4 — AUTHENTIFICATION & SÉCURITÉ
+════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="top-strip" style="background:linear-gradient(90deg,#7c3aed,#4338ca)"></div>
+
+  <div class="page-header">
+    <div class="section-label">Sécurité</div>
+    <h2>Authentification & Contrôle d'accès</h2>
+    <p>L'application utilise deux systèmes d'authentification indépendants avec des tokens JWT stockés dans des cookies httpOnly sécurisés.</p>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Deux tokens séparés -->
+    <div class="two-col" style="margin-bottom:22px;">
+      <div class="card" style="border-top:4px solid #2563eb;">
+        <div class="module-header">
+          <div class="module-icon" style="background:#eff6ff;color:#2563eb;">🔐</div>
+          <div>
+            <h3>Token Responsable</h3>
+            <p>Cookie : <code>auth_token</code></p>
+          </div>
+        </div>
+        <ul class="feature-list">
+          <li><span class="icon" style="background:#eff6ff;color:#2563eb;">✓</span> Durée de validité : 7 jours</li>
+          <li><span class="icon" style="background:#eff6ff;color:#2563eb;">✓</span> Cookie httpOnly (non accessible JS)</li>
+          <li><span class="icon" style="background:#eff6ff;color:#2563eb;">✓</span> SameSite: lax, Secure en production</li>
+          <li><span class="icon" style="background:#eff6ff;color:#2563eb;">✓</span> Protège les routes <code>/dashboard</code>, <code>/equipements</code></li>
+        </ul>
+      </div>
+      <div class="card" style="border-top:4px solid #f59e0b;">
+        <div class="module-header">
+          <div class="module-icon" style="background:#fef3c7;color:#b45309;">🛡️</div>
+          <div>
+            <h3>Token Administrateur</h3>
+            <p>Cookie : <code>admin_token</code></p>
+          </div>
+        </div>
+        <ul class="feature-list">
+          <li><span class="icon" style="background:#fef3c7;color:#b45309;">✓</span> Système entièrement séparé</li>
+          <li><span class="icon" style="background:#fef3c7;color:#b45309;">✓</span> Cookie httpOnly sécurisé</li>
+          <li><span class="icon" style="background:#fef3c7;color:#b45309;">✓</span> Protège toutes les routes <code>/admin/*</code></li>
+          <li><span class="icon" style="background:#fef3c7;color:#b45309;">✓</span> Accès global multi-sites</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Flux d'authentification -->
+    <div class="section-label" style="margin-bottom:10px;">Flux d'authentification</div>
+    <div class="flow" style="margin-bottom:22px;">
+      <div class="flow-step">
+        <div class="flow-box" style="background:#eff6ff;color:#1d4ed8;">Saisie email<br/>+ mot de passe</div>
+        <div class="flow-label">Formulaire de connexion</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-box" style="background:#f0fdf4;color:#145e38;">POST /auth/login<br/>REST API</div>
+        <div class="flow-label">Appel serveur sécurisé</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-box" style="background:#fef3c7;color:#92400e;">JWT reçu<br/>+ stocké httpOnly</div>
+        <div class="flow-label">Cookie sécurisé 7j</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-box" style="background:#f3e8ff;color:#6b21a8;">Middleware<br/>vérifie le cookie</div>
+        <div class="flow-label">À chaque requête</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-box" style="background:#f0fdf4;color:#145e38;">Accès<br/>accordé ✓</div>
+        <div class="flow-label">Redirection dashboard</div>
+      </div>
+    </div>
+
+    <!-- Règles de routage -->
+    <div class="section-label" style="margin-bottom:10px;">Règles de redirection (Middleware Next.js)</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Route</th>
+          <th>Condition</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>/dashboard</code>, <code>/equipements</code></td>
+          <td>Sans <code>auth_token</code></td>
+          <td>→ Redirige vers <code>/login</code></td>
+        </tr>
+        <tr>
+          <td><code>/admin/*</code></td>
+          <td>Sans <code>admin_token</code></td>
+          <td>→ Redirige vers <code>/admin/login</code></td>
+        </tr>
+        <tr>
+          <td><code>/login</code></td>
+          <td>Déjà connecté (token présent)</td>
+          <td>→ Redirige vers <code>/dashboard</code></td>
+        </tr>
+        <tr>
+          <td><code>/admin/login</code></td>
+          <td>Admin déjà connecté</td>
+          <td>→ Redirige vers <code>/admin</code></td>
+        </tr>
+        <tr>
+          <td>Routes responsable</td>
+          <td>Token expiré / invalide</td>
+          <td>→ <code>getProfile()</code> échoue → <code>/api/auth/clear</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Barre couleur site -->
+    <div class="info-box" style="background:#f0fdf4;border-color:#145e38;margin-top:20px;">
+      <h4 style="color:#145e38;">🎨 Personnalisation par site</h4>
+      <p>Chaque site a une couleur personnalisée stockée en base de données. Elle est appliquée dynamiquement sur la barre de contexte du responsable de site. La variable CSS <code>--site-color</code> est injectée dans le layout pour une cohérence visuelle par site.</p>
+    </div>
+
+  </div>
+  <div class="page-foot">
+    <span><strong>SATE Maintenance</strong> — Présentation technique</span>
+    <span>Page 4</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 5 — DASHBOARD RESPONSABLE
+════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="top-strip" style="background:linear-gradient(90deg,#2563eb,#7c3aed)"></div>
+
+  <div class="page-header">
+    <div class="section-label">Module 1</div>
+    <h2>Dashboard — Vue d'ensemble</h2>
+    <p>Tableau de bord central du responsable de site avec statistiques en temps réel et accès rapide à tous les modules.</p>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Statistiques principales -->
+    <div class="section-label" style="margin-bottom:10px;">Indicateurs clés (temps réel)</div>
+    <div class="three-col" style="margin-bottom:20px;">
+      <div class="stat-card" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
+        <div style="font-size:22px;margin-bottom:6px;">📋</div>
+        <div class="stat-num">Interventions</div>
+        <div class="stat-label">Total · En cours · Terminées · Urgentes</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#16a34a,#15803d);">
+        <div style="font-size:22px;margin-bottom:6px;">👷</div>
+        <div class="stat-num">Techniciens</div>
+        <div class="stat-label">Total · Actifs · Taux d'activité %</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">
+        <div style="font-size:22px;margin-bottom:6px;">🚛</div>
+        <div class="stat-num">Véhicules</div>
+        <div class="stat-label">Total · En service · En maintenance · Taux dispo %</div>
+      </div>
+    </div>
+
+    <!-- Accès rapide -->
+    <div class="section-label" style="margin-bottom:10px;">Accès rapide — 6 modules</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+      <div class="card" style="text-align:center;border-top:3px solid #ea580c;">
+        <div style="font-size:22px;margin-bottom:6px;">🏗️</div>
+        <strong style="font-size:13px;">Sites</strong>
+        <p style="font-size:11px;margin-top:4px;color:#6b7280;">Gérer les sites logistiques</p>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid #dc2626;">
+        <div style="font-size:22px;margin-bottom:6px;">📋</div>
+        <strong style="font-size:13px;">Rapports journaliers</strong>
+        <p style="font-size:11px;margin-top:4px;color:#6b7280;">Situation logistique par site</p>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid #2563eb;">
+        <div style="font-size:22px;margin-bottom:6px;">🔧</div>
+        <strong style="font-size:13px;">Interventions</strong>
+        <p style="font-size:11px;margin-top:4px;color:#6b7280;">Planifier et suivre</p>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid #7c3aed;">
+        <div style="font-size:22px;margin-bottom:6px;">🚛</div>
+        <strong style="font-size:13px;">Véhicules</strong>
+        <p style="font-size:11px;margin-top:4px;color:#6b7280;">Gérer le parc automobile</p>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid #16a34a;">
+        <div style="font-size:22px;margin-bottom:6px;">👷</div>
+        <strong style="font-size:13px;">Techniciens</strong>
+        <p style="font-size:11px;margin-top:4px;color:#6b7280;">Gérer l'équipe</p>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid #0d9488;">
+        <div style="font-size:22px;margin-bottom:6px;">📦</div>
+        <strong style="font-size:13px;">Équipements</strong>
+        <p style="font-size:11px;margin-top:4px;color:#6b7280;">Stock des équipements</p>
+      </div>
+    </div>
+
+    <!-- Fonctionnement technique -->
+    <div class="info-box" style="background:#eff6ff;border-color:#2563eb;">
+      <h4 style="color:#1d4ed8;">⚙️ Fonctionnement technique du dashboard</h4>
+      <ul style="list-style:disc;padding-left:18px;margin-top:6px;font-size:12.5px;color:#374151;line-height:1.8;">
+        <li>Les statistiques sont chargées via <strong>TanStack Query</strong> depuis l'API (<code>getAllStatistics()</code>)</li>
+        <li>Animations d'entrée progressives avec <strong>Framer Motion</strong> (délai de 0.1s entre chaque section)</li>
+        <li>Gestion des états de chargement et d'erreur avec indicateurs visuels</li>
+        <li>Rafraîchissement automatique des données grâce au cache React Query</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="page-foot">
+    <span><strong>SATE Maintenance</strong> — Présentation technique</span>
+    <span>Page 5</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 6 — MODULE INTERVENTIONS
+════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="top-strip" style="background:linear-gradient(90deg,#2563eb,#3b82f6)"></div>
+
+  <div class="page-header">
+    <div class="section-label">Module 2</div>
+    <h2>Gestion des Interventions</h2>
+    <p>Planification, suivi et export des interventions de maintenance associées à des véhicules et techniciens.</p>
+  </div>
+
+  <div class="page-body">
+
+    <div class="two-col" style="margin-bottom:20px;">
+      <!-- Champs d'une intervention -->
+      <div>
+        <div class="section-label" style="margin-bottom:10px;">Données d'une intervention</div>
+        <table>
+          <thead>
+            <tr><th>Champ</th><th>Type / Valeurs</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Date</td><td>Date de l'intervention</td></tr>
+            <tr><td>Description</td><td>Texte libre (problème constaté)</td></tr>
+            <tr><td>Désignation</td><td>Intitulé court (ex: Remplacement batterie)</td></tr>
+            <tr><td>Situation</td><td>État du matériel</td></tr>
+            <tr><td>Priorité</td><td><span class="status" style="background:#fef3c7;color:#92400e;">FAIBLE</span> <span class="status" style="background:#dbeafe;color:#1d4ed8;">MOYENNE</span> <span class="status" style="background:#fde8d8;color:#c2410c;">ÉLEVÉE</span> <span class="status" style="background:#fee2e2;color:#b91c1c;">URGENTE</span></td></tr>
+            <tr><td>Coût (FCFA)</td><td>Montant estimé de l'intervention</td></tr>
+            <tr><td>Temps estimé</td><td>Durée prévue (heures)</td></tr>
+            <tr><td>Temps réel</td><td>Durée effective (optionnel)</td></tr>
+            <tr><td>Pièces utilisées</td><td>Liste des pièces (optionnel)</td></tr>
+            <tr><td>Notes additionnelles</td><td>Observations (optionnel)</td></tr>
+            <tr><td>Statut</td><td><span class="status" style="background:#dbeafe;color:#1d4ed8;">EN_COURS</span> <span class="status" style="background:#dcfce7;color:#166534;">TERMINÉE</span> <span class="status" style="background:#fee2e2;color:#991b1b;">ANNULÉE</span></td></tr>
+            <tr><td>Véhicule</td><td>Association à un véhicule du site</td></tr>
+            <tr><td>Technicien</td><td>Technicien assigné</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Actions disponibles -->
+      <div>
+        <div class="section-label" style="margin-bottom:10px;">Actions disponibles</div>
+        <ul class="feature-list" style="margin-bottom:16px;">
+          <li>
+            <span class="icon" style="background:#eff6ff;color:#2563eb;">➕</span>
+            <span><strong>Créer</strong> une nouvelle intervention via un formulaire modal</span>
+          </li>
+          <li>
+            <span class="icon" style="background:#f0fdf4;color:#166534;">✏️</span>
+            <span><strong>Modifier</strong> les détails d'une intervention existante</span>
+          </li>
+          <li>
+            <span class="icon" style="background:#fff7ed;color:#c2410c;">🗑️</span>
+            <span><strong>Supprimer</strong> une intervention</span>
+          </li>
+          <li>
+            <span class="icon" style="background:#fef3c7;color:#b45309;">📄</span>
+            <span><strong>Exporter en PDF</strong> une fiche d'intervention complète</span>
+          </li>
+          <li>
+            <span class="icon" style="background:#f3e8ff;color:#6b21a8;">🔍</span>
+            <span><strong>Filtrer</strong> par statut, priorité, technicien ou véhicule</span>
+          </li>
+        </ul>
+
+        <div class="info-box" style="background:#fef3c7;border-color:#f59e0b;margin-top:8px;">
+          <h4 style="color:#92400e;">📄 Export PDF par intervention</h4>
+          <p style="color:#78350f;font-size:12px;">Chaque intervention peut être exportée en PDF nommé automatiquement :<br/>
+          <code>intervention-[désignation]-[date].pdf</code><br/>
+          Généré côté client avec <strong>@react-pdf/renderer</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Affichage carte intervention -->
+    <div class="section-label" style="margin-bottom:10px;">Affichage des interventions</div>
+    <div class="three-col">
+      <div class="card">
+        <div class="card-icon" style="background:#eff6ff;color:#2563eb;">📋</div>
+        <h3>Carte intervention</h3>
+        <p>Vue compacte avec priorité colorée, statut, véhicule associé, technicien et coût estimé.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:#f0fdf4;color:#166534;">📊</div>
+        <h3>Liste filtrée</h3>
+        <p>Affichage en liste avec possibilité de filtrer et trier par priorité, date ou statut.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:#fef3c7;color:#b45309;">📑</div>
+        <h3>Fiche PDF</h3>
+        <p>Document PDF complet avec tous les champs, nom du technicien, véhicule et horodatage.</p>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-foot">
+    <span><strong>SATE Maintenance</strong> — Présentation technique</span>
+    <span>Page 6</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 7 — MODULES TECHNICIENS, VÉHICULES, ÉQUIPEMENTS
+════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="top-strip" style="background:linear-gradient(90deg,#16a34a,#7c3aed)"></div>
+
+  <div class="page-header">
+    <div class="section-label">Modules 3, 4 & 5</div>
+    <h2>Techniciens · Véhicules · Équipements</h2>
+    <p>Gestion des ressources humaines, du parc automobile et des équipements logistiques par site.</p>
+  </div>
+
+  <div class="page-body">
+
+    <!-- TECHNICIENS -->
+    <div class="module-header">
+      <div class="module-icon" style="background:#f0fdf4;color:#166534;">👷</div>
+      <div>
+        <h3>Module Techniciens</h3>
+        <p>Gestion de l'équipe de techniciens affectés au site</p>
+      </div>
+    </div>
+    <div class="two-col" style="margin-bottom:20px;">
+      <ul class="feature-list">
+        <li><span class="icon" style="background:#f0fdf4;color:#166534;">➕</span> Ajouter un nouveau technicien (nom, prénom, contact)</li>
+        <li><span class="icon" style="background:#f0fdf4;color:#166534;">✏️</span> Modifier les informations d'un technicien</li>
+        <li><span class="icon" style="background:#f0fdf4;color:#166534;">🗑️</span> Supprimer un technicien</li>
+      </ul>
+      <ul class="feature-list">
+        <li><span class="icon" style="background:#f0fdf4;color:#166534;">📊</span> Taux d'activité calculé automatiquement</li>
+        <li><span class="icon" style="background:#f0fdf4;color:#166534;">🔗</span> Lié aux interventions (technicien assigné)</li>
+        <li><span class="icon" style="background:#f0fdf4;color:#166534;">👁️</span> Vue liste avec statut actif/inactif</li>
+      </ul>
+    </div>
+
+    <hr class="divider-line" />
+
+    <!-- VÉHICULES -->
+    <div class="module-header">
+      <div class="module-icon" style="background:#f3e8ff;color:#7c3aed;">🚛</div>
+      <div>
+        <h3>Module Véhicules</h3>
+        <p>Gestion du parc automobile logistique</p>
+      </div>
+    </div>
+    <div class="two-col" style="margin-bottom:20px;">
+      <ul class="feature-list">
+        <li><span class="icon" style="background:#f3e8ff;color:#7c3aed;">➕</span> Ajouter un véhicule (immatriculation, type, statut)</li>
+        <li><span class="icon" style="background:#f3e8ff;color:#7c3aed;">✏️</span> Mettre à jour le statut (actif / en maintenance)</li>
+        <li><span class="icon" style="background:#f3e8ff;color:#7c3aed;">📊</span> Taux de disponibilité calculé en temps réel</li>
+      </ul>
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Statuts véhicule</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <span class="status" style="background:#dcfce7;color:#166534;width:fit-content;">✅ ACTIF — En service</span>
+          <span class="status" style="background:#fef3c7;color:#92400e;width:fit-content;">🔧 EN_MAINTENANCE — En réparation</span>
+          <span class="status" style="background:#f3f4f6;color:#6b7280;width:fit-content;">⛔ INACTIF — Hors service</span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider-line" />
+
+    <!-- ÉQUIPEMENTS -->
+    <div class="module-header">
+      <div class="module-icon" style="background:#f0fdfa;color:#0d9488;">📦</div>
+      <div>
+        <h3>Module Équipements</h3>
+        <p>Inventaire des équipements logistiques par site</p>
+      </div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Catégories d'équipements</div>
+        <div class="tags">
+          <span class="tag" style="background:#f0fdfa;color:#0d9488;">🚜 TASSEUR</span>
+          <span class="tag" style="background:#f0fdfa;color:#0d9488;">🚛 TRACTEUR</span>
+          <span class="tag" style="background:#f0fdfa;color:#0d9488;">🔄 AMPLIROLL</span>
+          <span class="tag" style="background:#f0fdfa;color:#0d9488;">🏍️ MOTO_TRICYCLE</span>
+          <span class="tag" style="background:#f0fdfa;color:#0d9488;">📦 BP</span>
+          <span class="tag" style="background:#f0fdfa;color:#0d9488;">🚐 KIA</span>
+          <span class="tag" style="background:#f0fdfa;color:#0d9488;">🛺 VOITURETTE</span>
+        </div>
+      </div>
+      <ul class="feature-list">
+        <li><span class="icon" style="background:#f0fdfa;color:#0d9488;">➕</span> Ajouter un équipement avec image et immatriculation</li>
+        <li><span class="icon" style="background:#f0fdfa;color:#0d9488;">📸</span> Photo de l'équipement attachée</li>
+        <li><span class="icon" style="background:#f0fdfa;color:#0d9488;">🔗</span> Lié aux situations signalées</li>
+        <li><span class="icon" style="background:#f0fdfa;color:#0d9488;">📊</span> Stats par catégorie et par statut</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="page-foot">
+    <span><strong>SATE Maintenance</strong> — Présentation technique</span>
+    <span>Page 7</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 8 — SITUATIONS & RAPPORTS
+════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="top-strip" style="background:linear-gradient(90deg,#ea580c,#f59e0b)"></div>
+
+  <div class="page-header">
+    <div class="section-label">Modules 6 & 7</div>
+    <h2>Situations & Rapports journaliers</h2>
+    <p>Signalement des incidents logistiques et génération des rapports quotidiens d'activité par site.</p>
+  </div>
+
+  <div class="page-body">
+
+    <!-- SITUATIONS -->
+    <div class="module-header">
+      <div class="module-icon" style="background:#fff7ed;color:#ea580c;">⚠️</div>
+      <div>
+        <h3>Module Situations</h3>
+        <p>Signalement et suivi des incidents liés aux équipements</p>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-bottom:16px;">
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Données d'une situation</div>
+        <table>
+          <thead><tr><th>Champ</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>Nom</td><td>Intitulé de la situation</td></tr>
+            <tr><td>Description</td><td>Détail de l'incident constaté</td></tr>
+            <tr><td>Équipement</td><td>Équipement concerné (lié au module équipements)</td></tr>
+            <tr><td>Images</td><td>Photos jointes (multiples)</td></tr>
+            <tr><td>Besoins logistiques</td><td>Liste : désignation, quantité, prix unitaire (FCFA)</td></tr>
+            <tr><td>Statut</td><td>EN_ATTENTE · EN_COURS · VALIDÉE · TERMINÉE</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Cycle de vie d'une situation</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="status" style="background:#fef3c7;color:#92400e;min-width:90px;text-align:center;">⏳ EN_ATTENTE</span>
+            <span style="font-size:12px;color:#6b7280;">Signalement créé, en attente de traitement</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="status" style="background:#dbeafe;color:#1d4ed8;min-width:90px;text-align:center;">🔄 EN_COURS</span>
+            <span style="font-size:12px;color:#6b7280;">Prise en charge par l'équipe</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="status" style="background:#f3e8ff;color:#6b21a8;min-width:90px;text-align:center;">✅ VALIDÉE</span>
+            <span style="font-size:12px;color:#6b7280;">Validée par l'administrateur</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="status" style="background:#dcfce7;color:#166534;min-width:90px;text-align:center;">🏁 TERMINÉE</span>
+            <span style="font-size:12px;color:#6b7280;">Situation résolue et clôturée</span>
+          </div>
+        </div>
+
+        <div class="info-box" style="background:#fff7ed;border-color:#ea580c;margin-top:14px;">
+          <h4 style="color:#c2410c;">🔔 Notification admin</h4>
+          <p style="font-size:12px;color:#7c2d12;">Chaque nouvelle situation créée par un responsable génère une notification push pour l'administrateur (polling 15s).</p>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider-line" />
+
+    <!-- RAPPORTS -->
+    <div class="module-header">
+      <div class="module-icon" style="background:#fef3c7;color:#b45309;">📋</div>
+      <div>
+        <h3>Module Rapports journaliers</h3>
+        <p>Bilan quotidien de l'activité logistique d'un site</p>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <ul class="feature-list">
+        <li><span class="icon" style="background:#fef3c7;color:#b45309;">➕</span> Créer un nouveau rapport via <code>/rapports/nouveau</code></li>
+        <li><span class="icon" style="background:#fef3c7;color:#b45309;">✏️</span> Éditeur de rapport dédié (<code>rapport-editor.tsx</code>)</li>
+        <li><span class="icon" style="background:#fef3c7;color:#b45309;">📄</span> Exporter en PDF (bouton dédié par rapport)</li>
+        <li><span class="icon" style="background:#fef3c7;color:#b45309;">📅</span> Filtrage par date et par site</li>
+        <li><span class="icon" style="background:#fef3c7;color:#b45309;">👁️</span> Consultation des rapports passés</li>
+      </ul>
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Export PDF — Rapport</div>
+        <div class="info-box" style="background:#fef3c7;border-color:#f59e0b;">
+          <h4 style="color:#92400e;">📑 Génération PDF côté client</h4>
+          <p style="font-size:12px;color:#78350f;">Les rapports sont exportés en PDF via <strong>@react-pdf/renderer</strong> avec chargement dynamique (no SSR) pour des performances optimales. Le PDF inclut le récapitulatif complet de la situation logistique du site pour la journée.</p>
+        </div>
+
+        <div class="info-box" style="background:#f0fdf4;border-color:#145e38;margin-top:10px;">
+          <h4 style="color:#145e38;">🔑 Accès Admin aux rapports</h4>
+          <p style="font-size:12px;color:#14532d;">L'administrateur peut consulter tous les rapports depuis <code>/admin/rapports</code>, avec filtrage par site et date, et export PDF individuel de chaque rapport.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-foot">
+    <span><strong>SATE Maintenance</strong> — Présentation technique</span>
+    <span>Page 8</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 9 — ESPACE ADMINISTRATEUR
+════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="top-strip" style="background:linear-gradient(90deg,#111827,#374151)"></div>
+
+  <div class="page-header">
+    <div class="section-label">Partie Admin</div>
+    <h2>Espace Administrateur — SATE</h2>
+    <p>Interface dédiée à la supervision globale de tous les sites, avec gestion des comptes et monitoring en temps réel.</p>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Topbar admin -->
+    <div class="info-box" style="background:#111827;border-color:#f59e0b;color:white;margin-bottom:20px;">
+      <h4 style="color:#f59e0b;">🖥️ Interface sombre (Dark theme)</h4>
+      <p style="color:#9ca3af;font-size:12px;">L'espace admin utilise un thème sombre exclusif (<code>bg-gray-950</code>). La barre supérieure affiche le logo SATE, la cloche de notification et le bouton de déconnexion.</p>
+    </div>
+
+    <!-- Menu admin -->
+    <div class="section-label" style="margin-bottom:10px;">Sections de l'espace admin</div>
+    <div class="cards-grid cols-2" style="margin-bottom:20px;">
+      <div class="card" style="background:#111827;border-color:#374151;color:white;">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;">📄</div>
+          <div>
+            <h3 style="color:white;">Rapports journaliers</h3>
+            <p style="color:#6b7280;font-size:11px;"><code>/admin/rapports</code></p>
+          </div>
+        </div>
+        <ul class="feature-list">
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#f59e0b;">👁️</span><span style="color:#d1d5db;">Consulter tous les rapports de tous les sites</span></li>
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#f59e0b;">🔍</span><span style="color:#d1d5db;">Filtrer par site et par date</span></li>
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#f59e0b;">📑</span><span style="color:#d1d5db;">Exporter chaque rapport en PDF</span></li>
+        </ul>
+      </div>
+
+      <div class="card" style="background:#111827;border-color:#374151;color:white;">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(16,185,129,0.1);color:#10b981;">👥</div>
+          <div>
+            <h3 style="color:white;">Responsables de site</h3>
+            <p style="color:#6b7280;font-size:11px;"><code>/admin/responsables</code></p>
+          </div>
+        </div>
+        <ul class="feature-list">
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#10b981;">➕</span><span style="color:#d1d5db;">Créer un compte responsable (email, mot de passe)</span></li>
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#10b981;">🔗</span><span style="color:#d1d5db;">Associer à un site spécifique</span></li>
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#10b981;">🗑️</span><span style="color:#d1d5db;">Désactiver ou supprimer un compte</span></li>
+        </ul>
+      </div>
+
+      <div class="card" style="background:#111827;border-color:#374151;color:white;">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(99,102,241,0.1);color:#818cf8;">🏗️</div>
+          <div>
+            <h3 style="color:white;">Sites</h3>
+            <p style="color:#6b7280;font-size:11px;"><code>/admin/sites</code></p>
+          </div>
+        </div>
+        <ul class="feature-list">
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#818cf8;">➕</span><span style="color:#d1d5db;">Créer et configurer un nouveau site</span></li>
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#818cf8;">🎨</span><span style="color:#d1d5db;">Définir la couleur de marque du site</span></li>
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#818cf8;">📍</span><span style="color:#d1d5db;">Région et informations géographiques</span></li>
+        </ul>
+      </div>
+
+      <div class="card" style="background:#111827;border-color:#374151;color:white;">
+        <div class="module-header">
+          <div class="module-icon" style="background:rgba(239,68,68,0.1);color:#f87171;">⚠️</div>
+          <div>
+            <h3 style="color:white;">Situations</h3>
+            <p style="color:#6b7280;font-size:11px;"><code>/admin/situations</code></p>
+          </div>
+        </div>
+        <ul class="feature-list">
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#f87171;">👁️</span><span style="color:#d1d5db;">Voir toutes les situations de tous les sites</span></li>
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#f87171;">🔄</span><span style="color:#d1d5db;">Filtrer par statut (EN_ATTENTE, EN_COURS, VALIDÉE, TERMINÉE)</span></li>
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#f87171;">✅</span><span style="color:#d1d5db;">Valider ou mettre à jour le statut des situations</span></li>
+          <li><span class="icon" style="background:rgba(255,255,255,0.05);color:#f87171;">🔁</span><span style="color:#d1d5db;">Rafraîchissement automatique toutes les 30 secondes</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Notifications temps réel -->
+    <div class="section-label" style="margin-bottom:10px;">🔔 Système de notifications (temps réel)</div>
+    <div class="info-box" style="background:#111827;border-color:#f59e0b;color:white;">
+      <h4 style="color:#f59e0b;">Cloche de notification — Admin</h4>
+      <div class="two-col" style="margin-top:8px;">
+        <ul class="feature-list">
+          <li><span class="icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🔔</span><span style="color:#d1d5db;">Polling toutes les <strong>15 secondes</strong></span></li>
+          <li><span class="icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🔢</span><span style="color:#d1d5db;">Badge avec compteur de non-lus</span></li>
+          <li><span class="icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🔊</span><span style="color:#d1d5db;">Son d'alerte (Web Audio API)</span></li>
+        </ul>
+        <ul class="feature-list">
+          <li><span class="icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">✅</span><span style="color:#d1d5db;">Marquer comme lu (unitaire ou tout)</span></li>
+          <li><span class="icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🔗</span><span style="color:#d1d5db;">Lien direct vers la situation signalée</span></li>
+          <li><span class="icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">📋</span><span style="color:#d1d5db;">Panneau déroulant avec liste des alertes</span></li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-foot">
+    <span><strong>SATE Maintenance</strong> — Présentation technique</span>
+    <span>Page 9</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 10 — ARCHITECTURE & CONCLUSION
+════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="top-strip" style="background:linear-gradient(90deg,#145e38,#2563eb,#7c3aed)"></div>
+
+  <div class="page-header">
+    <div class="section-label">Architecture</div>
+    <h2>Architecture & Organisation du code</h2>
+    <p>Structure du projet Next.js 14 avec App Router, organisée par domaine fonctionnel.</p>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Structure dossiers -->
+    <div class="two-col" style="margin-bottom:20px;">
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Structure des dossiers</div>
+        <table>
+          <thead><tr><th>Dossier</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td><code>app/</code></td><td>Routage Next.js (App Router) — pages & layouts</td></tr>
+            <tr><td><code>app/(responsable)/</code></td><td>Groupe de routes responsable (dashboard, sites…)</td></tr>
+            <tr><td><code>app/(site)/</code></td><td>Site vitrine GI2E public</td></tr>
+            <tr><td><code>app/admin/</code></td><td>Espace administrateur protégé</td></tr>
+            <tr><td><code>components/</code></td><td>Composants React réutilisables par domaine</td></tr>
+            <tr><td><code>service/</code></td><td>Server Actions Next.js (appels API REST sécurisés)</td></tr>
+            <tr><td><code>components/pdf/</code></td><td>Composants de génération PDF</td></tr>
+            <tr><td><code>lib/</code></td><td>Utilitaires partagés (<code>utils.ts</code>, <code>cn()</code>)</td></tr>
+            <tr><td><code>middleware.ts</code></td><td>Protection des routes (JWT cookies)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Flux de données</div>
+        <ul class="feature-list" style="margin-bottom:14px;">
+          <li>
+            <span class="icon" style="background:#eff6ff;color:#2563eb;">1</span>
+            <span><strong>Server Actions</strong> — Chaque module a ses actions serveur dans <code>service/</code> (ex: <code>interventions.action.ts</code>). Appels API REST avec Bearer token.</span>
+          </li>
+          <li>
+            <span class="icon" style="background:#f0fdf4;color:#166534;">2</span>
+            <span><strong>TanStack Query</strong> — Cache et synchronisation côté client. <code>useQuery</code> pour lecture, invalidation au succès des mutations.</span>
+          </li>
+          <li>
+            <span class="icon" style="background:#fef3c7;color:#b45309;">3</span>
+            <span><strong>État local (useState)</strong> — Gestion optimiste des listes (mise à jour locale immédiate avant confirmation serveur).</span>
+          </li>
+          <li>
+            <span class="icon" style="background:#f3e8ff;color:#6b21a8;">4</span>
+            <span><strong>Polling</strong> — Données critiques (notifications, situations admin) rafraîchies automatiquement par intervalles.</span>
+          </li>
+        </ul>
+
+        <div class="info-box" style="background:#f0fdf4;border-color:#145e38;">
+          <h4 style="color:#145e38;">🏗️ Providers globaux</h4>
+          <p style="font-size:12px;color:#374151;"><strong>QueryClientProviderWrapper</strong> — Fournit le cache React Query à toute l'application.<br/>
+          <strong>ToastProvider</strong> — Notifications toast globales (react-hot-toast).<br/>
+          <strong>Header1</strong> — Barre de navigation globale avec profil utilisateur.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Récapitulatif fonctionnalités -->
+    <div class="section-label" style="margin-bottom:10px;">Récapitulatif des fonctionnalités</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Module</th>
+          <th>Responsable</th>
+          <th>Administrateur</th>
+          <th>Export PDF</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Sites logistiques</td><td>✅ Son site</td><td>✅ Tous</td><td>—</td></tr>
+        <tr><td>Rapports journaliers</td><td>✅ Créer / Voir</td><td>✅ Tous les sites</td><td>✅ Par rapport</td></tr>
+        <tr><td>Interventions</td><td>✅ CRUD complet</td><td>—</td><td>✅ Par intervention</td></tr>
+        <tr><td>Techniciens</td><td>✅ CRUD complet</td><td>—</td><td>—</td></tr>
+        <tr><td>Véhicules</td><td>✅ CRUD complet</td><td>—</td><td>—</td></tr>
+        <tr><td>Équipements</td><td>✅ CRUD complet</td><td>—</td><td>—</td></tr>
+        <tr><td>Situations</td><td>✅ Créer / Suivre</td><td>✅ Tous + Valider</td><td>—</td></tr>
+        <tr><td>Responsables</td><td>—</td><td>✅ CRUD complet</td><td>—</td></tr>
+        <tr><td>Notifications</td><td>Envoi auto</td><td>✅ Réception + lecture</td><td>—</td></tr>
+        <tr><td>Dashboard stats</td><td>✅ Son site</td><td>✅ Vue globale</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+  </div>
+  <div class="page-foot">
+    <span><strong>SATE Maintenance</strong> — Présentation technique &nbsp;·&nbsp; Mai 2026</span>
+    <span>Page 10</span>
+  </div>
+</div>
+
+</body>
+</html>
