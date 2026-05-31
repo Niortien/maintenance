@@ -142,3 +142,54 @@ export interface IAdminRapport {
   lignes: ILigneRapportMe[];
 }
 
+// ─── Admin: stats cards ───────────────────────────────────────────────────────
+export interface IAdminStatsCards {
+  totalSites: number;
+  totalEquipements: number;
+  equipementsOperationnel: number;
+  equipementsEnPanne: number;
+  equipementsInactifs: number;
+  totalTechniciens: number;
+  totalRapports: number;
+  totalLignes: number;
+  tauxOperationnel: number;
+  vehiculesParStatut: {
+    operationnel: number;
+    enPanne: number;
+    accidente: number;
+    enAttente: number;
+  };
+  topPannes: { type: string; count: number }[];
+}
+
+// ─── Admin: stats graph ───────────────────────────────────────────────────────
+export interface IAdminStatsGraphSerie {
+  date: string;
+  siteId: string;
+  siteNom: string;
+  siteCouleur: string | null;
+  total: number;
+  operationnel: number;
+  enPanne: number;
+  accidente: number;
+  enAttente: number;
+  tauxOperationnel: number;
+}
+
+export interface IAdminStatsGraphBySite {
+  siteId: string;
+  siteNom: string;
+  siteCouleur: string | null;
+  totalRapports: number;
+  totalVehicules: number;
+  operationnel: number;
+  enPanne: number;
+  accidente: number;
+  enAttente: number;
+}
+
+export interface IAdminStatsGraph {
+  series: IAdminStatsGraphSerie[];
+  bySite: IAdminStatsGraphBySite[];
+}
+

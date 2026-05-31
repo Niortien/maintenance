@@ -1,14 +1,35 @@
 import { logoutAdmin } from '@/service/auth/auth.action';
-import { adminGetSites } from '@/service/auth/auth.action';
+import { adminGetSites, adminGetStatsCards, adminGetStatsGraph } from '@/service/auth/auth.action';
 import { QueryClientProviderWrapper } from '@/components/providers/query-client-provider';
 import { Toaster } from 'react-hot-toast';
+import { Suspense } from 'react';
 import AdminNotificationBell from '@/components/admin/admin-notification-bell';
+import { AdminStatsCards } from '@/components/admin/admin-stats-cards';
+import { AdminStatsGraphs } from '@/components/admin/admin-stats-graphs';
+import { AdminStatsFilters } from '@/components/admin/admin-stats-filters';
 
 export const metadata = { title: 'Admin — SATE Maintenance' };
 
-export default async function AdminPage() {
-  const sitesRes = await adminGetSites();
-  const sites = sitesRes.success ? sitesRes.data : [];
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ siteId?: string; dateDebut?: string; dateFin?: string }>;
+}) {
+  const { siteId, dateDebut, dateFin } = await searchParams;
+  const filterParams = {
+    ...(siteId    ? { siteId }    : {}),
+    ...(dateDebut ? { dateDebut } : {}),
+    ...(dateFin   ? { dateFin }   : {}),
+  };
+
+  const [sitesRes, statsCardsRes, statsGraphRes] = await Promise.all([
+    adminGetSites(),
+    adminGetStatsCards(filterParams),
+    adminGetStatsGraph(filterParams),
+  ]);
+  const sites      = sitesRes.success      ? sitesRes.data      : [];
+  const statsCards = statsCardsRes.success ? statsCardsRes.data : null;
+  const statsGraph = statsGraphRes.success ? statsGraphRes.data : null;
 
   return (
     <QueryClientProviderWrapper>
@@ -44,6 +65,17 @@ export default async function AdminPage() {
           <h1 className="text-2xl font-bold text-white">Tableau de bord administrateur</h1>
           <p className="mt-1 text-sm text-gray-400">Vue d&apos;ensemble des sites SATE</p>
         </div>
+
+        {/* Filtres */}
+        <Suspense>
+          <AdminStatsFilters sites={sites} />
+        </Suspense>
+
+        {/* Stats cards */}
+        {statsCards && <AdminStatsCards stats={statsCards} />}
+
+        {/* Graphiques */}
+        {statsGraph && <AdminStatsGraphs graph={statsGraph} />}
 
         {/* Navigation */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

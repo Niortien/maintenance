@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { BASE_URL } from '@/baseurl/baseurl';
 import {
   IAdminAuthResponse, IAdminRapport, IAdminResponsable, IAdminSite,
+  IAdminStatsCards, IAdminStatsGraph,
   IAuthResponse, IInterventionMe, IProfileResponse,
   IRapportMe, ISiteStats, ITechnicienMe, IVehiculeMe,
 } from './types/auth.type';
@@ -243,4 +244,28 @@ export async function adminDeleteResponsable(id: string) {
   return adminFetch<{ message: string }>(`/admin/responsables/${id}`, {
     method: 'DELETE',
   });
+}
+
+// ─── Admin: stats cards ───────────────────────────────────────────────────────
+export async function adminGetStatsCards(params?: {
+  siteId?: string; dateDebut?: string; dateFin?: string;
+}) {
+  const qs = new URLSearchParams();
+  if (params?.siteId)    qs.set('siteId', params.siteId);
+  if (params?.dateDebut) qs.set('dateDebut', params.dateDebut);
+  if (params?.dateFin)   qs.set('dateFin', params.dateFin);
+  const query = qs.toString() ? `?${qs.toString()}` : '';
+  return adminFetch<IAdminStatsCards>(`/admin/stats/cards${query}`);
+}
+
+// ─── Admin: stats graph ───────────────────────────────────────────────────────
+export async function adminGetStatsGraph(params?: {
+  siteId?: string; dateDebut?: string; dateFin?: string;
+}) {
+  const qs = new URLSearchParams();
+  if (params?.siteId)    qs.set('siteId', params.siteId);
+  if (params?.dateDebut) qs.set('dateDebut', params.dateDebut);
+  if (params?.dateFin)   qs.set('dateFin', params.dateFin);
+  const query = qs.toString() ? `?${qs.toString()}` : '';
+  return adminFetch<IAdminStatsGraph>(`/admin/stats/graph${query}`);
 }
