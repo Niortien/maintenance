@@ -100,6 +100,19 @@ export async function changePassword(ancienMotDePasse: string, nouveauMotDePasse
   });
 }
 
+// ─── Google OAuth Token ───────────────────────────────────────────────────────
+export async function setGoogleToken(token: string, isAdmin: boolean) {
+  const store = await cookies();
+  const cookieName = isAdmin ? ADMIN_TOKEN_COOKIE : TOKEN_COOKIE;
+  store.set(cookieName, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 7,
+    path: '/',
+  });
+}
+
 // ─── Login Admin ──────────────────────────────────────────────────────────────
 export async function loginAdmin(email: string, password: string) {
   const result = await authFetch<IAdminAuthResponse>('/auth/admin/login', {
