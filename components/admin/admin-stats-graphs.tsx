@@ -66,7 +66,7 @@ export function AdminStatsGraphs({ graph }: { graph: IAdminStatsGraph }) {
               <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} allowDecimals={false} />
               <Tooltip
                 contentStyle={{ background: '#111827', border: '1px solid #374151', borderRadius: 8, fontSize: 12 }}
-                labelFormatter={(v: string) => new Date(v).toLocaleDateString('fr-FR')}
+                labelFormatter={(v) => typeof v === 'string' ? new Date(v).toLocaleDateString('fr-FR') : String(v)}
               />
               <Legend wrapperStyle={{ fontSize: 12, color: '#9ca3af' }} />
               {siteNames.map((nom, i) => (

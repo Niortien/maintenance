@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LayoutDashboard, Car, Users, Briefcase, MapPin, FileText, LogOut, Package, AlertTriangle } from 'lucide-react';
+import { Menu, X, Car, Users, Briefcase, MapPin, FileText, LogOut, Package, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -21,7 +21,6 @@ interface ResponsableInfo {
 }
 
 const navItems: NavItem[] = [
-  { name: 'Tableau de bord', href: '/', icon: LayoutDashboard },
   { name: 'Interventions', href: '/interventions', icon: Briefcase },
   // { name: 'Véhicules', href: '/vehicules', icon: Car },
   { name: 'Équipements', href: '/equipements', icon: Package },
