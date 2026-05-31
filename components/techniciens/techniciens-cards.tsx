@@ -77,6 +77,7 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
       fd.append('telephone', formData.telephone);
       fd.append('specialite', formData.specialite);
       fd.append('statut', formData.statut);
+      if (formData.lieuMission) fd.append('lieuMission', formData.lieuMission);
       if (photoFile) fd.append('photo', photoFile);
 
       const res = await updateTechnicien(technicien.id, fd);
@@ -94,11 +95,22 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
     }
   };
 
+  const STATUT_LABELS: Record<string, string> = {
+    ACTIF: 'Actif',
+    EN_MAINTENANCE: 'En maintenance',
+    INACTIF: 'Inactif',
+    EN_MISSION: 'En mission',
+    EN_CONGE: 'En congé',
+    MALADE: 'Malade',
+  };
+
   const getStatusColor = (statut: string) => {
     switch (statut) {
-      case 'DISPONIBLE': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+      case 'ACTIF': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
       case 'EN_MISSION': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400';
-      case 'ABSENT': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
+      case 'EN_MAINTENANCE': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400';
+      case 'EN_CONGE': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
+      case 'MALADE': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400';
       case 'INACTIF': return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
       default: return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
     }
@@ -133,7 +145,7 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
           </div>
         </div>
         <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${getStatusColor(technicien.statut)}`}>
-          {technicien.statut}
+          {STATUT_LABELS[technicien.statut] ?? technicien.statut}
         </span>
       </div>
 
@@ -217,13 +229,24 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ACTIF">Actif</SelectItem>
+                    <SelectItem value="EN_MAINTENANCE">En maintenance</SelectItem>
                     <SelectItem value="INACTIF">Inactif</SelectItem>
-                    <SelectItem value="DISPONIBLE">Disponible</SelectItem>
                     <SelectItem value="EN_MISSION">En mission</SelectItem>
-                    <SelectItem value="ABSENT">Absent</SelectItem>
+                    <SelectItem value="EN_CONGE">En congé</SelectItem>
+                    <SelectItem value="MALADE">Malade</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+              {formData.statut === 'EN_MISSION' && (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Lieu de mission</label>
+                  <Input
+                    value={formData.lieuMission ?? ''}
+                    onChange={(e) => setFormData({ ...formData, lieuMission: e.target.value })}
+                    placeholder="Ex : Chantier Nord, Kaolack..."
+                  />
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsUpdateDialogOpen(false)}>Annuler</Button>

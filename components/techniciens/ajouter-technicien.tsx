@@ -210,10 +210,11 @@ const AjouterTechnicienDialog = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ACTIF">Actif</SelectItem>
+                  <SelectItem value="EN_MAINTENANCE">En maintenance</SelectItem>
                   <SelectItem value="INACTIF">Inactif</SelectItem>
-                  <SelectItem value="DISPONIBLE">Disponible</SelectItem>
                   <SelectItem value="EN_MISSION">En mission</SelectItem>
-                  <SelectItem value="ABSENT">Absent</SelectItem>
+                  <SelectItem value="EN_CONGE">En congé</SelectItem>
+                  <SelectItem value="MALADE">Malade</SelectItem>
                 </SelectContent>
               </Select>
             </div>

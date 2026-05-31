@@ -6,6 +6,7 @@ email: string;
 telephone: string;
 specialite: string;
 statut: string;
+lieuMission?: string | null;
 photo?: string | null;
 }
 
@@ -14,5 +15,8 @@ export interface TechnicienStats {
     techniciensActifs: number;
     techniciensEnMaintenance: number;
     techniciensInactifs: number;
+    techniciensEnMission: number;
+    techniciensEnConge: number;
+    techniciensMalades: number;
     techniciensAvecInterventionsEnCours: number;
 }

@@ -131,7 +131,7 @@ export async function updateTechnicien(id: string, formData: FormData) {
   try {
     const token = await getAuthToken();
     const body = new FormData();
-    const fields = ['nom', 'prenom', 'email', 'telephone', 'statut', 'specialite'];
+    const fields = ['nom', 'prenom', 'email', 'telephone', 'statut', 'specialite', 'lieuMission'];
     for (const f of fields) {
       const val = formData.get(f);
       if (val) body.append(f, val as string);
