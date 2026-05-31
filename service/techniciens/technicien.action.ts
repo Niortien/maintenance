@@ -2,7 +2,7 @@
 
 import { BASE_URL } from "@/baseurl/baseurl";
 import { createTechnicienSchema, CreateTechnicienSchema } from "./technicien.schema";
-import { ITechnicien, TechnicienStats } from "./types/technicien.type";
+import { ITechnicien, ITechnicienDetails, IHistoriqueStatut, TechnicienStats } from "./types/technicien.type";
 import { getAuthToken } from '@/service/auth/auth.action';
 
 const origine: string = "Actions Technicien";
@@ -11,8 +11,11 @@ const TechnicienApi = {
   create: { method: "POST", endpoint: () => `${BASE_URL}/technicien` },
   getAll: { method: "GET", endpoint: () => `${BASE_URL}/technicien` },
   getById: { method: "GET", endpoint: (id: string) => `${BASE_URL}/technicien/${id}` },
-update: { method: "PATCH", endpoint: (id: string) => `${BASE_URL}/technicien/${id}` },
-
+  details: { method: "GET", endpoint: (id: string) => `${BASE_URL}/technicien/${id}/details` },
+  historique: { method: "GET", endpoint: (id: string) => `${BASE_URL}/technicien/${id}/historique` },
+  addHistorique: { method: "POST", endpoint: (id: string) => `${BASE_URL}/technicien/${id}/historique` },
+  cloturerHistorique: { method: "PATCH", endpoint: (id: string, hId: string) => `${BASE_URL}/technicien/${id}/historique/${hId}/cloturer` },
+  update: { method: "PATCH", endpoint: (id: string) => `${BASE_URL}/technicien/${id}` },
   delete: { method: "DELETE", endpoint: (id: string) => `${BASE_URL}/technicien/${id}` },
   getTechnicienStats: { method: "GET", endpoint: () => `${BASE_URL}/technicien/statistics` },
 };
@@ -168,5 +171,40 @@ export async function deleteTechnicien(id: string) {
 export async function getTechnicienStats(): Promise<{ success: boolean; data?: TechnicienStats; error?: string }> {
   return fetchJson<TechnicienStats>(TechnicienApi.getTechnicienStats.endpoint(), {
     method: TechnicienApi.getTechnicienStats.method,
+  });
+}
+
+// GET TECHNICIEN DETAILS (site + interventions + historique)
+export async function getTechnicienDetails(id: string) {
+  return fetchJson<ITechnicienDetails>(TechnicienApi.details.endpoint(id), { method: 'GET' });
+}
+
+// GET HISTORIQUE
+export async function getTechnicienHistorique(id: string) {
+  return fetchJson<IHistoriqueStatut[]>(TechnicienApi.historique.endpoint(id), { method: 'GET' });
+}
+
+// ADD HISTORIQUE EVENT
+export async function addHistoriqueTechnicien(
+  id: string,
+  payload: { statut: string; dateDebut: string; dateFin?: string; lieu?: string; notes?: string },
+) {
+  return fetchJson<IHistoriqueStatut>(TechnicienApi.addHistorique.endpoint(id), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
+// CLOTURER HISTORIQUE EVENT
+export async function cloturerHistoriqueTechnicien(
+  id: string,
+  historiqueId: string,
+  payload: { dateFin: string; notes?: string },
+) {
+  return fetchJson<IHistoriqueStatut>(TechnicienApi.cloturerHistorique.endpoint(id, historiqueId), {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
   });
 }

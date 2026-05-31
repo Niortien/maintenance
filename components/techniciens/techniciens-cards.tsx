@@ -1,9 +1,9 @@
 'use client';
 
-import { ITechnicien } from "@/service/techniciens/types/technicien.type";
+import { ITechnicien, IHistoriqueStatut } from "@/service/techniciens/types/technicien.type";
 import { useRef, useState } from "react";
 import toast from 'react-hot-toast';
-import { deleteTechnicien, updateTechnicien } from "@/service/techniciens/technicien.action";
+import { deleteTechnicien, updateTechnicien, getTechnicienHistorique, addHistoriqueTechnicien, cloturerHistoriqueTechnicien } from "@/service/techniciens/technicien.action";
 import { motion } from "framer-motion";
 import {
   Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Phone, Pencil, Trash2, Wrench, ImagePlus, X } from 'lucide-react';
+import { Mail, Phone, Pencil, Trash2, Wrench, ImagePlus, X, History, Plus, CheckCircle } from 'lucide-react';
 import { BASE_URL } from "@/baseurl/baseurl";
 
 const SPECIALITES = [
@@ -36,6 +36,11 @@ interface TechniciensCardsProps {
 const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+  const [isHistoriqueOpen, setIsHistoriqueOpen] = useState(false);
+  const [historique, setHistorique] = useState<IHistoriqueStatut[]>([]);
+  const [histLoading, setHistLoading] = useState(false);
+  const [newEvent, setNewEvent] = useState({ statut: 'EN_CONGE', dateDebut: '', dateFin: '', lieu: '', notes: '' });
+  const [showAddEvent, setShowAddEvent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ ...technicien });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -49,6 +54,46 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
     if (file.size > 5 * 1024 * 1024) { toast.error('Photo trop lourde (max 5 Mo)'); return; }
     setPhotoFile(file);
     setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const handleOpenHistorique = async () => {
+    setIsHistoriqueOpen(true);
+    setHistLoading(true);
+    const res = await getTechnicienHistorique(technicien.id);
+    if (res.success) setHistorique(res.data);
+    else toast.error('Impossible de charger l\'historique');
+    setHistLoading(false);
+  };
+
+  const handleAddEvent = async () => {
+    if (!newEvent.dateDebut) { toast.error('Date de début requise'); return; }
+    setHistLoading(true);
+    const res = await addHistoriqueTechnicien(technicien.id, {
+      statut: newEvent.statut,
+      dateDebut: newEvent.dateDebut,
+      dateFin: newEvent.dateFin || undefined,
+      lieu: newEvent.lieu || undefined,
+      notes: newEvent.notes || undefined,
+    });
+    if (res.success) {
+      toast.success('Vévénement ajouté');
+      setHistorique((h) => [res.data, ...h]);
+      setNewEvent({ statut: 'EN_CONGE', dateDebut: '', dateFin: '', lieu: '', notes: '' });
+      setShowAddEvent(false);
+    } else toast.error(res.error ?? 'Erreur');
+    setHistLoading(false);
+  };
+
+  const handleCloturer = async (hId: string) => {
+    const fin = prompt('Date de fin (AAAA-MM-JJ) :');
+    if (!fin) return;
+    setHistLoading(true);
+    const res = await cloturerHistoriqueTechnicien(technicien.id, hId, { dateFin: fin });
+    if (res.success) {
+      toast.success('Event clôturé, statut remis à ACTIF');
+      setHistorique((h) => h.map((e) => e.id === hId ? { ...e, dateFin: fin } : e));
+    } else toast.error(res.error ?? 'Erreur');
+    setHistLoading(false);
   };
 
   const handleDeleteTechnician = async () => {
@@ -128,7 +173,7 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
       className="w-full bg-white dark:bg-slate-800 rounded-2xl border border-emerald-100 dark:border-slate-700 overflow-hidden transition-all duration-300"
     >
       {/* Bandeau vert en haut */}
-      <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-4 flex items-center justify-between">
+      <div className="bg-linear-to-r from-emerald-700 to-emerald-600 px-5 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {photoUrl ? (
             <img src={photoUrl} alt={`${technicien.nom} ${technicien.prenom}`} className="h-11 w-11 rounded-full object-cover border-2 border-white/40" />
@@ -163,6 +208,16 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
 
       {/* Actions */}
       <div className="flex gap-2 px-5 pb-4">
+        {/* Historique button */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={handleOpenHistorique}
+          className="flex items-center justify-center gap-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 hover:bg-indigo-100 p-2 rounded-lg transition"
+          title="Historique"
+        >
+          <History className="h-4 w-4" />
+        </motion.button>
         <Dialog open={isUpdateDialogOpen} onOpenChange={(v) => { setIsUpdateDialogOpen(v); if (!v) { setPhotoFile(null); setPhotoPreview(null); } }}>
           <DialogTrigger asChild>
             <motion.button
@@ -286,6 +341,109 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Historique Dialog */}
+      <Dialog open={isHistoriqueOpen} onOpenChange={setIsHistoriqueOpen}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5 text-indigo-500" />
+              Historique — {technicien.prenom} {technicien.nom}
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Ajouter un événement */}
+          <div className="mb-4">
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-indigo-600 border-indigo-200"
+              onClick={() => setShowAddEvent((v) => !v)}
+            >
+              <Plus className="h-3.5 w-3.5" /> Nouvel événement
+            </Button>
+
+            {showAddEvent && (
+              <div className="mt-3 space-y-2 rounded-xl border border-indigo-100 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30 p-4">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Type d&apos;événement</label>
+                    <Select value={newEvent.statut} onValueChange={(v) => setNewEvent({ ...newEvent, statut: v })}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="EN_CONGE">En congé</SelectItem>
+                        <SelectItem value="MALADE">Maladie</SelectItem>
+                        <SelectItem value="EN_MISSION">Mission</SelectItem>
+                        <SelectItem value="EN_MAINTENANCE">Maintenance</SelectItem>
+                        <SelectItem value="INACTIF">Inactif</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Date début</label>
+                    <Input type="date" className="h-8 text-xs" value={newEvent.dateDebut} onChange={(e) => setNewEvent({ ...newEvent, dateDebut: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Date fin (optionnel)</label>
+                    <Input type="date" className="h-8 text-xs" value={newEvent.dateFin} onChange={(e) => setNewEvent({ ...newEvent, dateFin: e.target.value })} />
+                  </div>
+                  {newEvent.statut === 'EN_MISSION' && (
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Lieu</label>
+                      <Input className="h-8 text-xs" value={newEvent.lieu} onChange={(e) => setNewEvent({ ...newEvent, lieu: e.target.value })} placeholder="Ex: Kaolack…" />
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Notes</label>
+                    <Input className="h-8 text-xs" value={newEvent.notes} onChange={(e) => setNewEvent({ ...newEvent, notes: e.target.value })} placeholder="Motif, précisions…" />
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white" onClick={handleAddEvent} disabled={histLoading}>
+                    Enregistrer
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowAddEvent(false)}>Annuler</Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Liste historique */}
+          {histLoading ? (
+            <p className="text-sm text-slate-500 text-center py-4">Chargement…</p>
+          ) : historique.length === 0 ? (
+            <p className="text-sm text-slate-500 text-center py-4">Aucun événement enregistré.</p>
+          ) : (
+            <ul className="space-y-2">
+              {historique.map((evt) => {
+                const isOpen = !evt.dateFin;
+                return (
+                  <li key={evt.id} className={`flex items-start justify-between gap-3 rounded-lg border p-3 text-sm ${isOpen ? 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20' : 'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/30'}`}>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-slate-800 dark:text-slate-100">{STATUT_LABELS[evt.statut] ?? evt.statut}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {new Date(evt.dateDebut).toLocaleDateString('fr-FR')}
+                        {evt.dateFin ? ` → ${new Date(evt.dateFin).toLocaleDateString('fr-FR')}` : ' → en cours'}
+                      </p>
+                      {evt.lieu && <p className="text-xs text-slate-500">📍 {evt.lieu}</p>}
+                      {evt.notes && <p className="text-xs text-slate-400 italic mt-0.5">{evt.notes}</p>}
+                    </div>
+                    {isOpen && (
+                      <button
+                        onClick={() => handleCloturer(evt.id)}
+                        className="shrink-0 flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-medium"
+                        title="Clôturer"
+                      >
+                        <CheckCircle className="h-4 w-4" /> Clôturer
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
