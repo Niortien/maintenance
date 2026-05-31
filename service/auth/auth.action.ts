@@ -226,3 +226,21 @@ export async function adminCreateResponsable(data: {
     body: JSON.stringify(data),
   });
 }
+
+// ─── Admin: modifier un responsable ──────────────────────────────────────────
+export async function adminUpdateResponsable(
+  id: string,
+  data: { nom?: string; prenom?: string; telephone?: string },
+) {
+  return adminFetch<IAdminResponsable>(`/admin/responsables/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+// ─── Admin: supprimer un responsable ─────────────────────────────────────────
+export async function adminDeleteResponsable(id: string) {
+  return adminFetch<{ message: string }>(`/admin/responsables/${id}`, {
+    method: 'DELETE',
+  });
+}

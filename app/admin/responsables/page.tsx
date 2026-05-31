@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { adminGetResponsables, adminGetSites } from '@/service/auth/auth.action';
 import CreateResponsableForm from './create-form';
+import { ResponsableActions } from './responsable-actions';
 
 export const metadata = { title: 'Responsables — Admin SATE' };
 
@@ -63,6 +64,7 @@ export default async function AdminResponsablesPage() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400">Téléphone</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400">Site</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400">Créé le</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800">
@@ -83,6 +85,9 @@ export default async function AdminResponsablesPage() {
                       </td>
                       <td className="px-4 py-3 text-xs text-gray-500">
                         {new Date(r.createdAt).toLocaleDateString('fr-FR')}
+                      </td>
+                      <td className="px-4 py-3">
+                        <ResponsableActions responsable={r} />
                       </td>
                     </tr>
                   ))}
