@@ -11,8 +11,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Phone, Pencil, Trash2, Wrench, ImagePlus, X, History, Plus, CheckCircle } from 'lucide-react';
+import { Mail, Phone, Pencil, Trash2, Wrench, ImagePlus, X, History, Plus, CheckCircle, ExternalLink } from 'lucide-react';
 import { BASE_URL } from "@/baseurl/baseurl";
+import Link from 'next/link';
 
 const SPECIALITES = [
   { value: "MECANIQUE_GENERALE", label: "Mécanique générale" },
@@ -208,6 +209,14 @@ const TechniciensCards = ({ technicien, onDelete, onUpdate }: TechniciensCardsPr
 
       {/* Actions */}
       <div className="flex gap-2 px-5 pb-4">
+        {/* Voir détails */}
+        <Link
+          href={`/techniciens/${technicien.id}`}
+          className="flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-700/40 text-slate-600 dark:text-slate-300 hover:bg-slate-100 p-2 rounded-lg transition"
+          title="Voir détails"
+        >
+          <ExternalLink className="h-4 w-4" />
+        </Link>
         {/* Historique button */}
         <motion.button
           whileHover={{ scale: 1.02 }}
