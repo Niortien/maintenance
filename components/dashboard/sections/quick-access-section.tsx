@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FileText, MapPin, Wrench, Car, Users, ArrowRight, Package } from 'lucide-react';
+import { FileText, MapPin, Wrench, Users, ArrowRight, Package } from 'lucide-react';
 import Link from 'next/link';
 
 const pages = [
@@ -31,15 +31,6 @@ const pages = [
     gradient: 'from-blue-500 to-indigo-500',
     bg: 'bg-blue-50 dark:bg-blue-900/20',
     text: 'text-blue-600',
-  },
-  {
-    href: '/vehicules',
-    label: 'Véhicules',
-    description: 'Gérer le parc automobile',
-    icon: <Car className="h-7 w-7" />,
-    gradient: 'from-purple-500 to-violet-500',
-    bg: 'bg-purple-50 dark:bg-purple-900/20',
-    text: 'text-purple-600',
   },
   {
     href: '/techniciens',

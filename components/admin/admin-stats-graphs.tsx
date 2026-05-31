@@ -12,9 +12,9 @@ const FALLBACK_COLORS = ['#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6', 
 
 export function AdminStatsGraphs({ graph }: { graph: IAdminStatsGraph }) {
   // ─── Série temporelle : regrouper par date ───────────────────────────────
-  const dateMap = new Map<string, Record<string, number>>();
+  const dateMap = new Map<string, Record<string, number | string>>();
   for (const s of graph.series) {
-    if (!dateMap.has(s.date)) dateMap.set(s.date, { date: s.date } as Record<string, number>);
+    if (!dateMap.has(s.date)) dateMap.set(s.date, { date: s.date });
     const row = dateMap.get(s.date)!;
     row[`${s.siteNom}_op`]    = s.operationnel;
     row[`${s.siteNom}_panne`] = s.enPanne;

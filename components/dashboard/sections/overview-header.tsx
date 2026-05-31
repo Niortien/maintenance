@@ -27,7 +27,7 @@ const OverviewHeader: React.FC<OverviewHeaderProps> = ({ stats }) => {
       </div>
 
       {/* Cartes résumées */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Carte Interventions */}
         <motion.div
           whileHover={{ scale: 1.02, y: -4 }}
@@ -65,31 +65,12 @@ const OverviewHeader: React.FC<OverviewHeaderProps> = ({ stats }) => {
             {stats.techniciens.actifs} actifs ({stats.techniciens.tauxActivite}%)
           </p>
         </motion.div>
-
-        {/* Carte Véhicules */}
-        <motion.div
-          whileHover={{ scale: 1.02, y: -4 }}
-          className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="bg-white/20 rounded-lg p-3">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <span className="text-3xl font-bold">{stats.vehicules.total}</span>
-          </div>
-          <h3 className="text-lg font-semibold mb-1">Véhicules</h3>
-          <p className="text-purple-100 text-sm">
-            {stats.vehicules.actifs} actifs ({stats.vehicules.tauxDisponibilite}% disponibles)
-          </p>
-        </motion.div>
       </div>
 
       {/* Indicateurs de performance */}
       <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
         <h2 className="text-xl font-bold text-slate-800 mb-4">Indicateurs Clés</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600">{stats.interventions.urgentes}</div>
             <div className="text-sm text-slate-600">Interventions Urgentes</div>
@@ -97,10 +78,6 @@ const OverviewHeader: React.FC<OverviewHeaderProps> = ({ stats }) => {
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">{stats.techniciens.tauxActivite}%</div>
             <div className="text-sm text-slate-600">Taux d&apos;Activité</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">{stats.vehicules.tauxDisponibilite}%</div>
-            <div className="text-sm text-slate-600">Disponibilité</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-orange-600">{stats.interventions.coutTotal}</div>

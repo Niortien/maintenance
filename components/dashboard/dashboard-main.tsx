@@ -7,7 +7,6 @@ import { getAllStatistics } from '@/service/interventions/interventions.action';
 import toast from 'react-hot-toast';
 import InterventionStatsSection from './sections/intervention-stats-section';
 import TechnicienStatsSection from './sections/technicien-stats-section';
-import VehiculeStatsSection from './sections/vehicule-stats-section';
 import OverviewHeader from './sections/overview-header';
 import QuickAccessSection from './sections/quick-access-section';
 
@@ -77,15 +76,6 @@ const DashboardMain = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <TechnicienStatsSection stats={stats.techniciens} />
-          </motion.div>
-
-          {/* Section Véhicules */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <VehiculeStatsSection stats={stats.vehicules} />
           </motion.div>
         </div>
       </div>
