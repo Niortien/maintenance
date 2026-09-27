@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Car, Users, Briefcase, MapPin, FileText, LogOut, Package, AlertTriangle } from 'lucide-react';
+import { Menu, X, Car, Users, Briefcase, MapPin, FileText, LogOut, Package, AlertTriangle, Droplets } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -25,6 +25,7 @@ const navItems: NavItem[] = [
   // { name: 'Véhicules', href: '/vehicules', icon: Car },
   { name: 'Équipements', href: '/equipements', icon: Package },
   { name: 'Situations', href: '/situations', icon: AlertTriangle },
+  { name: 'Répartitions', href: '/repartitions', icon: Droplets },
   { name: 'Techniciens', href: '/techniciens', icon: Users },
   { name: 'Sites', href: '/sites', icon: MapPin },
   { name: 'Rapports', href: '/rapports', icon: FileText },
